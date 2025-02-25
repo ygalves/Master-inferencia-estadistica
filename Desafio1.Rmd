@@ -1,17 +1,17 @@
+# ------------------------------
 <p align="center">
 
 <img src="https://www.uao.edu.co/wp-content/uploads/2024/12/uao-logo-2-04.webp" width="15%"/>
 
 <h2>UNIVERSIDAD AUTÓNOMA DE OCCIDENTE</strong></h2>
-
 <h3>02/22/2025 CALI - COLOMBIA</strong></h3>
-
+# ------------------------------
 <h3><strong>MAESTRIA EN INTELIGENCIA ARTIFICIAL Y CIENCIA DE DATOS</strong></h3>
 
 <h3><strong>INFERENCIA ESTADISTICA</strong></h3>
 
 <h3><strong>ENTREGA: </strong> DESAFÍO 1</h3>
-
+# ------------------------------
 <h4>
 
 <li><strong>Profesor:</strong> Cristian E García</li>
@@ -29,6 +29,7 @@
 <li><strong>Código:</strong> 22500214</li>
 
 </h4>
+# ------------------------------
 
 
 ```{r instalar_librerias}
@@ -105,7 +106,8 @@ library(tidyr)
 
 ```
 
-# Situación 1
+# ------------------------------
+# SITUACIÓN 1
 
 Para estimar la proporción desconocida $π(0 < π ≤ 0,50)$ de una determinada especie de peces que habita en el océano Pacífico, se aplicará el siguiente plan de muestreo. Cada uno de $n( > 1)$ barcos pesqueros capturará peces hasta capturar exactamente $k( > 1)$ peces de la especie particular de interés, y se registrará el número total de peces capturados por cada barco pesquero. Todos los peces capturados se devolverán ilesos al océano Pacífico. Para resolver dicho problema se le pide investigar 4 formas diferentes de estimar dicha proporción y comparar el desempeño de los resultados.
 
@@ -323,7 +325,9 @@ Obsevamos que segun el ECM:
 
 *   El estimador bayesiano no presenta resultados en todos los escenarios y puede signiicar que necesita mayor verificacion o una seleccion del pior nueva o que este estimador no es suficientemente robusto para este muestreo en particular.
 
-# SITUACION 2
+# ------------------------------
+# SITUACIÓN 2
+
 Suponga que se tiene una muestra aleatoria de tamaño $2n$ tomada de una población $X$, con $E(X) = \mu$ y $Var(X) = \sigma²$, Sean:
 
 $$\overline{X}_1 = \frac{1}{2n} \sum_{i=1}^{2n}x_i\quad \text{y}\quad \overline{X}_2 = \frac{1}{n} \sum_{i=1}^{n}x_i$$
@@ -333,10 +337,46 @@ dos estimadores de $\mu$.
 
 *   Simule una situación con 1000 muestras de tal forma que se pueda evidenciar de manera gráfica cual de los dos estimados es mejor.
 
+```{r}
+
+```
+
+# ------------------------------
+# SITUACIÓN 3
+
+En una población hay un número $\theta$ de vehículos informales (llamados “piratas”), que es desconocido. Supongamos que los piratas, están numerados visiblemente en forma consecutiva: $1,2,3,...,\theta$. Con el propósito de estimar $\theta$ , usted registra una muestra aleatoria de $n$ piratas y anotando cada vez el número $X$ correspondiente. Así dispone de una muestra aleatoria: $X1, X2…, Xn$. Existen varias propuestas razonables de estimadores para el número total $\theta$ de taxis, como las que se describen a continuación y que surgen de la consideración de que la distribución de la variable aleatoria $X$ (número del carro), es uniforme discreta. Los estimadores propuestos son los siguientes:
+
+$$\hat{\theta}_{(1)} = 2\overline{X}_n-1$$
+$$\hat{\theta}_{(2)} = X_{(n)}+X_{(1)}-1$$
+$$\hat{\theta}_{(3)} = X_{max}+\overline{d}$$
+Donde $\overline{d}$ es la media de los saltos consecutivos de los números de la muestra al ser ordenados en forma creciente. (Desarrolle $\overline{d}$ y se simplificará la expresión)
+
+$$\hat{\theta}_{(4)} = 2Me(X)-1$$
+$$\hat{\theta}_{(5)} = \overline{X}+3S$$
+Simule el comportamiento de cada uno de estos estimadores, $R$ o cualquier otra opción tecnológica, variando el valor del parámetro y el tamaño de muestra $n$ . Nos interesa compararlos especialmente en cuanto al Sesgo, la Varianza de los estimadores y también el Error Cuadrático Medio (ECM) y cualquier otro indicador que le parezca razonable.
+
+```{r}
+
+```
+
+# ------------------------------
+# SITUACIÓN 4
+
+Tiempos de atención entre llamadas de reclamaciones por seguros.
+
+Sean $(X_1, \dots, X_n)$ con densidad $\lambda e^{\lambda x},(x \geq 0),(n \leq2)$. Sea $S_n=\sum_{i=1}^{n} X_i)$. Es bien conocido que $Z = \lambda S_n$ tiene densidad:
+$$f_z(z) = \frac{z^{n-1}e^{-z}}{(n-1)!},\;z \geq 0$$
+*   Utilice esto para calcular el sesgo y el ECM de $\hat{\lambda}=\frac{n-1}{S_n}$.
+
+*   Calcule el estimados de momentos y máximo verosímil para la función de densidad.
+
+```{r}
+
+```
 
 
-
-# Notas
+# ------------------------------
+# NOTAS
 
 ## Reglas básicas de Logaritmos:
 *   Producto: $log(ab) = log(a) + log(b)$
