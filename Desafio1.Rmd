@@ -1,17 +1,30 @@
+<<<<<<< HEAD
 # ------------------------------
+=======
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
 <p align="center">
 
 <img src="https://www.uao.edu.co/wp-content/uploads/2024/12/uao-logo-2-04.webp" width="15%"/>
 
 <h2>UNIVERSIDAD AUTÓNOMA DE OCCIDENTE</strong></h2>
+<<<<<<< HEAD
 <h3>02/22/2025 CALI - COLOMBIA</strong></h3>
 # ------------------------------
+=======
+
+<h3>02/22/2025 CALI - COLOMBIA</strong></h3>
+
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
 <h3><strong>MAESTRIA EN INTELIGENCIA ARTIFICIAL Y CIENCIA DE DATOS</strong></h3>
 
 <h3><strong>INFERENCIA ESTADISTICA</strong></h3>
 
 <h3><strong>ENTREGA: </strong> DESAFÍO 1</h3>
+<<<<<<< HEAD
 # ------------------------------
+=======
+
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
 <h4>
 
 <li><strong>Profesor:</strong> Cristian E García</li>
@@ -29,6 +42,7 @@
 <li><strong>Código:</strong> 22500214</li>
 
 </h4>
+<<<<<<< HEAD
 # ------------------------------
 
 
@@ -108,11 +122,16 @@ library(tidyr)
 
 # ------------------------------
 # SITUACIÓN 1
+=======
+
+# Situación 1
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
 
 Para estimar la proporción desconocida $π(0 < π ≤ 0,50)$ de una determinada especie de peces que habita en el océano Pacífico, se aplicará el siguiente plan de muestreo. Cada uno de $n( > 1)$ barcos pesqueros capturará peces hasta capturar exactamente $k( > 1)$ peces de la especie particular de interés, y se registrará el número total de peces capturados por cada barco pesquero. Todos los peces capturados se devolverán ilesos al océano Pacífico. Para resolver dicho problema se le pide investigar 4 formas diferentes de estimar dicha proporción y comparar el desempeño de los resultados.
 
 Plantee tres escenarios diferentes para llevar a cabo dichas estimaciones, compare para diferentes tamaños de muestra y concluya teniendo en cuenta las medidas de desempeño como el ECM
 
+<<<<<<< HEAD
 ## Entendiendo el Problema
 
 *   En el plan de muestreo se capturará peces de forma aleatoria, cada captura tiene sólo dos posibles resultados, el pez capturado puede ser o no de la especie de interés, por tanto se obseva que el muestreo tiene un comportamiento binomial, el éxito de cada captura tiene una probabilidad $\pi$ y el fracaso $(1−\pi)$. En estadística se llama a este tipo de muestreos como Ensayo de Bernoulli^[https://es.wikipedia.org/wiki/Ensayo_de_Bernoulli︎].
@@ -384,3 +403,14 @@ $$f_z(z) = \frac{z^{n-1}e^{-z}}{(n-1)!},\;z \geq 0$$
 *   Potencia: $log(a^r) = {r}{log(a)}$
 *   Logaritmo de 1: $log(1) = 0$
 *   Cambio de base: $log_b(a)=\frac{log_c(a)}{log_c(b)^,}$
+=======
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
