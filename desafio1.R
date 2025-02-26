@@ -228,5 +228,71 @@ if(requireNamespace("knitr", quietly = TRUE)){
   print(ECM_tabla)
 }
 
+# -------------------------------
+# SITUACION 2
+# -------------------------------
+
+###############################################################################
+# Estimación de la Media de una Población
+# Comparación de dos estimadores:
+#   X1 = (1/(2n)) * Σ x_i (usa 2n datos)
+#   X2 = (1/n)  * Σ x_i (usa solo los primeros n datos)
+#
+# Se evidenciará que X1 es mejor ya que tiene menor varianza.
+###############################################################################
+
+# Parámetros de la simulación
+set.seed(123)                # La semilla para grantizar la reproducibilidad
+n <- 50                      # tamaño de la muestra
+N <- 2 * n                   # Tamaño total de la muestra
+mu <- 10                     # Media de la poblacion
+sigma <- 2                   # Desviación estándarde la poblacion
+replicaciones <- 1000        # Número de muestras para la simulacion
+
+# Creamos los vectores para almacenar los estimadores
+X1 <- numeric(replicaciones) # Estimador que usa 2n datos (todos)
+X2 <- X1  # Estimador que solo usa el primer set de datos
+
+# Simulación: en cada réplica se extrae una muestra de tamaño 2n de la población
+for(i in 1:replicaciones){
+  sample_data <- rnorm(N, mean = mu, sd = sigma)
+  X1[i] <- mean(sample_data)        # Usa todos los 2n datos
+  X2[i] <- mean(sample_data[1:n])     # Usa solo los primeros n datos
+}
+
+# Calcular las varianzas empíricas (ECM, pues son insesgados)
+ecm_X1 <- var(X1)   # Teóricamente: sigma^2/(2n) = (4)/(100) = 0.04
+ecm_X2 <- var(X2)   # Teóricamente: sigma^2/n   = (4)/(50)  = 0.08
+
+cat("Varianza (ECM) de X1 (2n datos):", ecm_X1, "\n")
+cat("Varianza (ECM) de X2 (n datos):", ecm_X2, "\n")
+
+# Crear un data frame para graficar las densidades de ambos estimadores
+df <- data.frame(
+  Estimador = factor(c(rep("X1 (2n datos)", length(X1)), rep("X2 (n datos)", length(X2)))),
+  Valor = c(X1, X2)
+)
+
+# Gráfica comparativa: densidades de los estimadores y línea vertical en mu
+g <- ggplot(df, aes(x = Valor, fill = Estimador)) +
+  geom_density(alpha = 0.5) +
+  geom_vline(xintercept = mu, linetype = "dashed", color = "black", linewidth = 1) +
+  labs(title = "Comparación de Estimadores de la Media",
+       subtitle = "X1: usa 2n datos vs. X2: usa n datos",
+       x = "Valor estimado de μ", y = "Densidad") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme_minimal()
+
+print(g)
+
+# Tabla de resumen usando knitr::kable
+ECM_tabla <- data.frame(
+  Estimador = c("X1 (2n datos)", "X2 (n datos)"),
+  ECM = c(ecm_X1, ecm_X2)
+)
+
+# Imprimir la tabla
+kable(ECM_tabla, caption = "ECM (Varianza empírica) de cada estimador")
+
 
 

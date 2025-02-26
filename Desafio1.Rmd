@@ -74,7 +74,7 @@ conflict_prefer("lag", "dplyr")
 conflict_prefer("lift", "purrr")
 
 # Para hacer isntalacion de varios paquetes creamos un vector que contenga los nombre de los paquetes que queremos instalar
-paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","tidyr")
+paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","tidyr","gridExtra")
 
 # hacemos una Función que nos permite instalar paquetes si no están ya instalados en el sistema
 instalar_paquetes <- function(paquetes) {
