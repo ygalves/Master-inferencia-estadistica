@@ -1,16 +1,16 @@
 # ------------------------------
-<p align="center">
 
 <img src="https://www.uao.edu.co/wp-content/uploads/2024/12/uao-logo-2-04.webp" width="15%"/>
 
 <h2>UNIVERSIDAD AUTÓNOMA DE OCCIDENTE</strong></h2>
+
 <h3>02/22/2025 CALI - COLOMBIA</strong></h3>
 # ------------------------------
-<h3><strong>MAESTRIA EN INTELIGENCIA ARTIFICIAL Y CIENCIA DE DATOS</strong></h3>
 
 <h3><strong>INFERENCIA ESTADISTICA</strong></h3>
 
 <h3><strong>ENTREGA: </strong> DESAFÍO 1</h3>
+
 # ------------------------------
 <h4>
 
@@ -29,10 +29,9 @@
 <li><strong>Código:</strong> 22500214</li>
 
 </h4>
+
 # ------------------------------
 
-<<<<<<< HEAD
-=======
 
 ```{r instalar_librerias}
 # Variable de control para habilitar o deshabilitar la eliminación de archivos, si tiene problemas para instalar un paqute puede que ayude borrar estos archivos , primero ejecuta este Chunk en FALSE, si hay problemas llevalo a TRUE y ejecuta este Chunk de nuevo. ES probable que tenga que instalar las siguientes dependencias uasndo los siguientes comandos en uan terminal: 
@@ -74,7 +73,7 @@ conflict_prefer("lag", "dplyr")
 conflict_prefer("lift", "purrr")
 
 # Para hacer isntalacion de varios paquetes creamos un vector que contenga los nombre de los paquetes que queremos instalar
-paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","tidyr","gridExtra")
+paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","tidyr")
 
 # hacemos una Función que nos permite instalar paquetes si no están ya instalados en el sistema
 instalar_paquetes <- function(paquetes) {
@@ -108,29 +107,14 @@ library(tidyr)
 
 ```
 
-<<<<<<< HEAD
->>>>>>> 6cc3ef8 (Final desafio 1)
-# Situación 1
-=======
 # ------------------------------
 # SITUACIÓN 1
->>>>>>> a94c1bb (Escribir los ejercicios)
 
 Para estimar la proporción desconocida $π(0 < π ≤ 0,50)$ de una determinada especie de peces que habita en el océano Pacífico, se aplicará el siguiente plan de muestreo. Cada uno de $n( > 1)$ barcos pesqueros capturará peces hasta capturar exactamente $k( > 1)$ peces de la especie particular de interés, y se registrará el número total de peces capturados por cada barco pesquero. Todos los peces capturados se devolverán ilesos al océano Pacífico. Para resolver dicho problema se le pide investigar 4 formas diferentes de estimar dicha proporción y comparar el desempeño de los resultados.
 
 Plantee tres escenarios diferentes para llevar a cabo dichas estimaciones, compare para diferentes tamaños de muestra y concluya teniendo en cuenta las medidas de desempeño como el ECM
 
-<<<<<<< HEAD
-```{r}
-plot(cars)
-```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
-=======
 ## Entendiendo el Problema
 
 *   En el plan de muestreo se capturará peces de forma aleatoria, cada captura tiene sólo dos posibles resultados, el pez capturado puede ser o no de la especie de interés, por tanto se obseva que el muestreo tiene un comportamiento binomial, el éxito de cada captura tiene una probabilidad $\pi$ y el fracaso $(1−\pi)$. En estadística se llama a este tipo de muestreos como Ensayo de Bernoulli^[https://es.wikipedia.org/wiki/Ensayo_de_Bernoulli︎].
@@ -283,7 +267,7 @@ for (esc in names(result)) {
 for (esc in names(Escenarios)) {
   k_vis <- Escenarios[[esc]]$k
   x_vals <- k_vis:(k_vis + 40)
-  # dnbinom calcula la probabilidad para el número de fracasos, por ello se usa (x - k_vis)
+  # Redondeamos para asegurarnos de tener valores enteros en la función dnbinom
   pmf_vals <- dnbinom(round(x_vals - k_vis), size = k_vis, prob = pi_verdadero)
   df_teorico <- data.frame(Total = x_vals, Probabilidad = pmf_vals)
   
@@ -294,11 +278,11 @@ for (esc in names(Escenarios)) {
   
   g <- ggplot(df_teorico, aes(x = Total, y = Probabilidad)) +
     geom_bar(stat = "identity", fill = "skyblue", color = "black") +
-    stat_function(fun = function(x) dnbinom(round(x - k_vis), linewidth = k_vis, prob = pi_verdadero),
-                  color = "red", linewidth = 1) +
+    geom_line(data = df_teorico, aes(x = Total, y = Probabilidad),
+              color = "red", size = 1) +
     labs(title = paste("PMF Teórica - Escenario", esc, "(k =", k_vis, ", π =", pi_verdadero, ")"),
          x = "Número Total de Peces Capturados", y = "Probabilidad") +
-    xlim(k_vis, max(simulados)) +
+    xlim(c(k_vis, k_vis + 40)) +
     theme_minimal()
   
   print(g)
@@ -355,7 +339,87 @@ dos estimadores de $\mu$.
 
 *   Simule una situación con 1000 muestras de tal forma que se pueda evidenciar de manera gráfica cual de los dos estimados es mejor.
 
+## Entendiendo el Problema
+
+*   Tenemos una poblacion $X$ la cual tiene una media dad por la funcion $E(X)=\mu$ y una varianza $Var(X)=\sigma²$.
+*   Como el ejercicio no hace mencion a la distribución de esta población $X$, asumimos una distribucion normal^[https://economipedia.com/definiciones/teorema-central-del-limite.html].
+*   De dicha población vamos a extraer una muestra aleatória cuyo tamaño es $2n$.
+*   De esta muestra consideramos dos estimadores para calcular la media $\mu$:
+    1.  El primer estimador de $\overline{X}_1$ el cual va ha utilizar todos los datos de la muestra ($2n$ datos):
+        $$\overline{X}_1 = \frac{1}{2n} \sum_{i=1}^{2n}x_i$$
+    2.  El segundo estimador de $\overline{X}_2$ el cual va ha utilizar sólo los datos de la primera mitad de la muestra ($n$ datos):
+        $$\overline{X}_2 = \frac{1}{n} \sum_{i=1}^{n}x_i$$
+*   Tenemos que determinar cual es el mejor estimador de $\mu$
+    1.  Ambos estimadores son insesgados ya que: $E(\overline{X}_1) \; = \; E(\overline{X}_2 ) \; = \; \mu$.
+    2.  Vamos a medir el desepeño usando la varanza de cada uno de los dos estimadores, donde la Varianza de $\overline{X}_1$ es: $Var(\overline{X}_1)=\frac{\sigma²}{2n}$ y la Varianza de $\overline{X}_2$ es:   $Var(\overline{X}_2)=\frac{\sigma²}{n}$
+    3.  Podemos estimar entonces por observación del divisor que el estimador de $Var(\overline{X}_1)$ es menor y entonces debe ser mas preciso, y por tanto debe de tener menor varianza, entonces **el estimador $\overline{X}_1$ es el mejor estimador de $\mu$**.
+    
 ```{r}
+###############################################################################
+# Estimación de la Media de una Población
+# Comparación de dos estimadores:
+#   X1 = (1/(2n)) * Σ x_i (usa 2n datos)
+#   X2 = (1/n)  * Σ x_i (usa solo los primeros n datos)
+#
+# Se evidenciará que X1 es mejor ya que tiene menor varianza.
+###############################################################################
+
+# Cargar las librerías necesarias
+library(ggplot2)
+library(knitr)
+
+# Parámetros de la simulación
+set.seed(123)                # La semilla para grantizar la reproducibilidad
+n <- 50                      # tamaño de la muestra
+N <- 2 * n                   # Tamaño total de la muestra
+mu <- 10                     # Media de la poblacion
+sigma <- 2                   # Desviación estándarde la poblacion
+replicaciones <- 1000        # Número de muestras para la simulacion
+
+# Creamos los vectores para almacenar los estimadores
+X1 <- numeric(replicaciones) # Estimador que usa 2n datos (todos)
+X2 <- X1  # Estimador que solo usa el primer set de datos
+
+# Simulación: en cada réplica se extrae una muestra de tamaño 2n de la población
+for(i in 1:replicaciones){
+  sample_data <- rnorm(N, mean = mu, sd = sigma)
+  X1[i] <- mean(sample_data)        # Usa todos los 2n datos
+  X2[i] <- mean(sample_data[1:n])     # Usa solo los primeros n datos
+}
+
+# Calcular las varianzas empíricas (ECM, pues son insesgados)
+ecm_X1 <- var(X1)   # Teóricamente: sigma^2/(2n) = (4)/(100) = 0.04
+ecm_X2 <- var(X2)   # Teóricamente: sigma^2/n   = (4)/(50)  = 0.08
+
+cat("Varianza (ECM) de X1 (2n datos):", ecm_X1, "\n")
+cat("Varianza (ECM) de X2 (n datos):", ecm_X2, "\n")
+
+# Crear un data frame para graficar las densidades de ambos estimadores
+df <- data.frame(
+  Estimador = factor(c(rep("X1 (2n datos)", length(X1)), rep("X2 (n datos)", length(X2)))),
+  Valor = c(X1, X2)
+)
+
+# Gráfica comparativa: densidades de los estimadores y línea vertical en mu
+g <- ggplot(df, aes(x = Valor, fill = Estimador)) +
+  geom_density(alpha = 0.5) +
+  geom_vline(xintercept = mu, linetype = "dashed", color = "black", linewidth = 1) +
+  labs(title = "Comparación de Estimadores de la Media",
+       subtitle = "X1: usa 2n datos vs. X2: usa n datos",
+       x = "Valor estimado de μ", y = "Densidad") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme_minimal()
+
+print(g)
+
+# Tabla de resumen usando knitr::kable
+ECM_tabla <- data.frame(
+  Estimador = c("X1 (2n datos)", "X2 (n datos)"),
+  ECM = c(ecm_X1, ecm_X2)
+)
+
+# Imprimir la tabla
+kable(ECM_tabla, caption = "ECM (Varianza empírica) de cada estimador")
 
 ```
 
@@ -373,7 +437,126 @@ $$\hat{\theta}_{(4)} = 2Me(X)-1$$
 $$\hat{\theta}_{(5)} = \overline{X}+3S$$
 Simule el comportamiento de cada uno de estos estimadores, $R$ o cualquier otra opción tecnológica, variando el valor del parámetro y el tamaño de muestra $n$ . Nos interesa compararlos especialmente en cuanto al Sesgo, la Varianza de los estimadores y también el Error Cuadrático Medio (ECM) y cualquier otro indicador que le parezca razonable.
 
+## Entendiendo el Problema
+
+*   Dada una población de vehiculos tenemos una cantidad desconocida $\theta$ de vehiculos que hacen acarreo de personas de forma informal ("piratas").
+*   Asumimos que los vehiculos estan marcados con numeros consecutivos así: $1, 2, 3, \dots, \theta$.
+*   Asumimos que si extraemos una muestra aleatória de $\theta$ seguirá una **distribución uniforme discreta^[https://es.wikipedia.org/wiki/Distribuci%C3%B3n_uniforme_discreta]** sobre el conjunto $\left\{1,2 \dots,\theta\right\}$. Esto porque:
+    1.  Los vehículos estan numerados de forma consecutiva $1,2,3, \dots, \theta$. Con lo cual cada número entre $1$ y $\theta$ aparece solo una vez.
+    2.  Todos los vehículos en la población de interés tiene la misma probabilidad de ser seleccionado al tomar una muestra aleatória, como la numeración es consecutiva y cada número es único, la probabilidad de tomar cualquier número $x$ con $\left(1\leq x \leq \theta\right)$ igual para todos los sujetos y sin favorecer a ninguno, o sea $P(X = x) = \frac{1}{\theta}\quad para \; todo \; x \; en \left\{1,2, \dots,\theta\right\}$
+    3.  **distribución uniforme discreta - $U(a,b)$** es aquella en la que cada uno de los valores posibles tienen la misma probabilodad de ocurrir.
+    4.  Tomando las estimaciones dadas en el ejercicio podemos derivar fórmulas basadas en las propiedades de la distribución uniforme directa, por ejemplo la media teórica de la distribución uniforme discreta es: $E(X)= \frac{\theta + 1}{2}$, con esta funcion podemos fromular el estimador $\hat{\theta}_{(1)} = 2\overline{X}_n-1$.
+*   Como $\theta$ es desconocido vamos a estimarlo tomando una muestra aleatória de $n$ vehículos y se llevan apuntes de sus números $X_1, X_2, \dots , X_n$.
+*   Hay que tener en cuenta que $\theta$ es el valor límite superior de la población de vehiculos informales, que es desconocido, la probabilidad de encontrarlo ó acercarnos a este, tomando sólo una muestra de esta población es baja si $n << \theta$
+*   Para el estimador $\hat\theta_{(1)}$ usamos la media muestral $\overline{X}_n$ ya que la media de una distribución uniforme discreta en ${1, \dots, \theta}$ es $\frac{\theta + 1}{2}$ y se puede despejar para $\theta$.
+
 ```{r}
+# Cargar las librerías necesarias
+library(knitr)
+library(dplyr)
+
+# Parámetros de la simulación:
+set.seed(1234)
+B <- 1000                   # Número de simulaciones (réplicas) por escenario
+
+# Definamos algunos escenarios:
+# (Nota: elegimos n relativamente pequeño respecto a theta para que la muestra sea viable)
+theta_values <- c(100, 200, 500)    # Diferentes valores de theta (número total de vehículos)
+n_values <- c(5, 10, 20)              # Diferentes tamaños de muestra (número de vehículos observados)
+
+# Funciones para los estimadores:
+theta1 <- function(x) {
+  # Estimador basado en la media: 2*mean(x)-1
+  2 * mean(x) - 1
+}
+
+theta2 <- function(x) {
+  # Estimador basado en el mínimo y máximo: X_(n) + X_(1) - 1
+  min(x) + max(x) - 1
+}
+
+theta3 <- function(x) {
+  # Primero ordenamos la muestra
+  x_ord <- sort(x)
+  # Calculamos el "gap" promedio entre los extremos: (X_max - X_min)/(n-1)
+  d_bar <- (max(x_ord) - min(x_ord)) / (length(x_ord) - 1)
+  max(x_ord) + d_bar
+}
+
+theta4 <- function(x) {
+  # Estimador basado en la mediana: 2*median(x)-1
+  2 * median(x) - 1
+}
+
+theta5 <- function(x) {
+  # Estimador basado en la media y la desviación estándar: mean(x) + 3*sd(x)
+  mean(x) + 3 * sd(x)
+}
+
+# Preparar un data frame para acumular los resultados
+sim_results <- data.frame()
+
+# Bucle sobre cada combinación de theta y n
+for (theta in theta_values) {
+  for (n in n_values) {
+    # Es importante que n < theta (ya que estamos tomando una muestra de 1:theta)
+    if(n >= theta) next
+    
+    # Inicializar vectores para almacenar las estimaciones
+    est1 <- numeric(B)
+    est2 <- numeric(B)
+    est3 <- numeric(B)
+    est4 <- numeric(B)
+    est5 <- numeric(B)
+    
+    for (i in 1:B) {
+      # Extraemos una muestra aleatoria sin reemplazo de {1,2,...,theta}
+      muestra <- sample(1:theta, size = n, replace = FALSE)
+      # Calcular los cinco estimadores
+      est1[i] <- theta1(muestra)
+      est2[i] <- theta2(muestra)
+      est3[i] <- theta3(muestra)
+      est4[i] <- theta4(muestra)
+      est5[i] <- theta5(muestra)
+    }
+    
+    # Calcular sesgo, varianza y ECM para cada estimador
+    bias1 <- mean(est1) - theta
+    var1  <- var(est1)
+    ECM1  <- bias1^2 + var1
+    
+    bias2 <- mean(est2) - theta
+    var2  <- var(est2)
+    ECM2  <- bias2^2 + var2
+    
+    bias3 <- mean(est3) - theta
+    var3  <- var(est3)
+    ECM3  <- bias3^2 + var3
+    
+    bias4 <- mean(est4) - theta
+    var4  <- var(est4)
+    ECM4  <- bias4^2 + var4
+    
+    bias5 <- mean(est5) - theta
+    var5  <- var(est5)
+    ECM5  <- bias5^2 + var5
+    
+    # Crear un data frame con los resultados de este escenario
+    df_temp <- data.frame(
+      theta = theta,
+      n = n,
+      Estimador = c("2*mean-1", "min+max-1", "max+(max-min)/(n-1)", "2*median-1", "mean+3*sd"),
+      Bias = c(bias1, bias2, bias3, bias4, bias5),
+      Variance = c(var1, var2, var3, var4, var5),
+      ECM = c(ECM1, ECM2, ECM3, ECM4, ECM5)
+    )
+    # Acumular los resultados
+    sim_results <- rbind(sim_results, df_temp)
+  }
+}
+
+# Mostrar la tabla resumen con knitr::kable
+kable(sim_results, digits = 3, caption = "Comparación de Estimadores: Sesgo, Varianza y ECM")
 
 ```
 
@@ -397,9 +580,22 @@ $$f_z(z) = \frac{z^{n-1}e^{-z}}{(n-1)!},\;z \geq 0$$
 # NOTAS
 
 ## Reglas básicas de Logaritmos:
+
 *   Producto: $log(ab) = log(a) + log(b)$
 *   Cociente: $log(\frac{a}{b}) = log(a) - log(b)$
 *   Potencia: $log(a^r) = {r}{log(a)}$
 *   Logaritmo de 1: $log(1) = 0$
 *   Cambio de base: $log_b(a)=\frac{log_c(a)}{log_c(b)^,}$
->>>>>>> 6cc3ef8 (Final desafio 1)
+
+
+=======
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
