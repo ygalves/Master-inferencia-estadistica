@@ -30,12 +30,91 @@
 
 </h4>
 
+<<<<<<< HEAD
+=======
+
+```{r instalar_librerias}
+# Variable de control para habilitar o deshabilitar la eliminación de archivos, si tiene problemas para instalar un paqute puede que ayude borrar estos archivos , primero ejecuta este Chunk en FALSE, si hay problemas llevalo a TRUE y ejecuta este Chunk de nuevo. ES probable que tenga que instalar las siguientes dependencias uasndo los siguientes comandos en uan terminal: 
+# sudo apt-get update
+# sudo apt-get install libharfbuzz-dev libfribidi-dev libcurl4-openssl-dev libssl-dev libxml2-dev libfontconfig1-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
+
+eliminar_archivos_habilitado <- FALSE
+
+# Definir los archivos a eliminar
+archivos <- c(".Rhistory", ".RData", ".Rprofile")
+
+# Función para eliminar los archivos si existen
+eliminar_archivos <- function(archivos) {
+  for (archivo in archivos) {
+    if (file.exists(archivo)) {
+      file.remove(archivo)
+      cat("Archivo eliminado:", archivo, "\n")
+    } else {
+      cat("Archivo no encontrado:", archivo, "\n")
+    }
+  }
+}
+
+# Eliminar los archivos si se habilitó la opción
+if (eliminar_archivos_habilitado) {
+  eliminar_archivos(archivos)
+} else {
+  cat("La eliminación de archivos está deshabilitada.\n")
+}
+
+# Instalar y cargar el paquete para manejo de conflictos
+install.packages("conflicted")
+library(conflicted)
+
+# Preferir funciones específicas de paquetes que estan en conflicto en la librería tidyverse purrr y tidyr las cuales tienen funciones con nombres iguales "stats" y "caret". así que vamos adefinir cual de estas funciones vamos a preferir
+
+conflict_prefer("filter", "dplyr")
+conflict_prefer("lag", "dplyr")
+conflict_prefer("lift", "purrr")
+
+# Para hacer isntalacion de varios paquetes creamos un vector que contenga los nombre de los paquetes que queremos instalar
+paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","tidyr")
+
+# hacemos una Función que nos permite instalar paquetes si no están ya instalados en el sistema
+instalar_paquetes <- function(paquetes) {
+  paquetes_instalados <- paquetes[paquetes %in% installed.packages()[,"Package"]]
+  nuevos_paquetes <- paquetes[!(paquetes %in% installed.packages()[,"Package"])]
+  
+  if(length(nuevos_paquetes)) {
+    install.packages(nuevos_paquetes, quiet = TRUE)
+    cat("Se instalaron los siguientes paquetes:", nuevos_paquetes, "\n")
+  } else {
+    cat("Todos los paquetes ya están instalados.\n")
+  }
+  
+  if(length(paquetes_instalados)) {
+    cat("Los siguientes paquetes ya estaban instalados:", paquetes_instalados, "\n")
+  }
+}
+
+# Instala los paquetes que son necesarios
+instalar_paquetes(paquetes)
+
+
+# Cargar los paquetes
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(ModelMetrics)
+library(stats4)
+library(tidyverse)
+library(tidyr)
+
+```
+
+>>>>>>> 6cc3ef8 (Final desafio 1)
 # Situación 1
 
 Para estimar la proporción desconocida $π(0 < π ≤ 0,50)$ de una determinada especie de peces que habita en el océano Pacífico, se aplicará el siguiente plan de muestreo. Cada uno de $n( > 1)$ barcos pesqueros capturará peces hasta capturar exactamente $k( > 1)$ peces de la especie particular de interés, y se registrará el número total de peces capturados por cada barco pesquero. Todos los peces capturados se devolverán ilesos al océano Pacífico. Para resolver dicho problema se le pide investigar 4 formas diferentes de estimar dicha proporción y comparar el desempeño de los resultados.
 
 Plantee tres escenarios diferentes para llevar a cabo dichas estimaciones, compare para diferentes tamaños de muestra y concluya teniendo en cuenta las medidas de desempeño como el ECM
 
+<<<<<<< HEAD
 ```{r}
 plot(cars)
 ```
@@ -45,3 +124,238 @@ Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by press
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
 
 The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+=======
+## Entendiendo el Problema
+
+*   En el plan de muestreo se capturará peces de forma aleatoria, cada captura tiene sólo dos posibles resultados, el pez capturado puede ser o no de la especie de interés, por tanto se obseva que el muestreo tiene un comportamiento binomial, el éxito de cada captura tiene una probabilidad $\pi$ y el fracaso $(1−\pi)$. En estadística se llama a este tipo de muestreos como Ensayo de Bernoulli^[https://es.wikipedia.org/wiki/Ensayo_de_Bernoulli︎].
+
+*   Cada barco en el plan de muestreo va ha capturar peces hasta que se completen $k(>1)$
+ éxitos o sea numero de peces de la especie que nos interesa, mientras no se alcance ese numero de éxitos, cada barco debe repetir el ensayo de bernoulli hasta completar la meta establecida.
+ 
+*   El número total de muestras ó capturas necesarias para cumplir con los exitos solicitados es una variable aleatoria desconocida $X$.
+
+*   Según la **teoría de la probabilidad^[https://www.eurekando.org/biografias/biografia-de-daniel-bernoulli-teoria-de-la-probabilidad/]**, el número de ensayos necesarios para conseguír $k$
+ exitos en ensayos independientes de Bernoulli y con una probabilidad de éxito que permanece constantesigue una **Distribución negativa Binomial^[https://es.statisticseasily.com/glosario/%C2%BFQu%C3%A9-es-la-distribuci%C3%B3n-binomial-negativa%3F/#]**
+ 
+La funcion de probilidad pra la distibución negativa binomial es:
+$$P(X=x) = \binom{k-1}{x-1} \pi^k (1-\pi)^{x-k}, \; x = k, k+1, k+2, \ldots$$
+Ya que para el $x−ésima$ captura sea el especimen $k−ésimo$ correctO, teniendo que $k−1$  éxitos en los $x−1$ capturas previas y luego una captura correcta en el $x−ésima$ captura
+
+**Dónde:**
+
+$$Esperanza=\mathbb{E}[X]=\frac{k}{\pi}$$
+
+$$Varianza=Var(X)=\frac{k(1−\pi)}{\pi²}$$
+
+*   Es necesario definir el valor real de la proporción de  peces en el oceano de la especie buscada ($\pi$) y a este se le denominará como $\pi_{verdadero}$, ese valor que ya se conoce como correcto no va ha permitir comparar los estimadores en la simulaciones ó en los diferentes escenarios propuestos y luego comparar los resultados con el valor real para saber la precisión y consistencia de los diferentes estimadores.
+
+*   Si no conocemos a $\pi_{verdadero}$ y es lo que realmente sucede en la vida real, para las simulaciones establecemos el valor a un estimado para poder realizar los análisis necesarios a los estimadores o en su defecto se evaluan los estimadores usando tecnicas diferentes a ECM tal como usar la varianza, usar los intervalos de confianza, estudios de remuestreo, etc.
+
+*   Los estudios de simulacion donde se estima a$\pi_{verdadero}$ nos permiten evaluar el comportamiento de los estimadores bajo condiciones controladas para verificar la fiabilidad y robustez para poder elegir un método apropiado para aplicarlo despues a los datos reales y evitar fallas posteriores.
+*   Debemos usar un prior que es básicamente la distribucion de probabilidad que tenemos antes de realizar la observacion de datos, o sea es básicamente una estiamción de la probailidad que esperamos del muestreo antes de que se realice y se analisen los datos. 
+*   El Prior es fundamental para el teorema de bayes donde se combina con la función de verosimilitud para obtener la distribucion posterior:
+$$Teorema\;de\;Bayes = Posterior\; \alpha\; Verosimilitud\; x\; Prior$$
+
+En este ejercicio, creemos que la proporción está entre 0 y 0.5 y no se inclina a favor de ningun valor particular y podemos utilizar un prior uniforme en intervalo $(0, 0.5)$ y de esta forma inicialmente consideramos que todos los valores en ese rango son probables.
+
+
+## Solución
+Propongo cuatro estimadores para $\pi$:
+
+1.    Estimador MLE, de la mediana muestral ó Momentos: 
+$\hat{\pi}_{MLE} = \frac{k}{\overline{X}}$
+
+2.    Estimador basado en transformación logarítmica: 
+$\hat{\pi}_{log} = exp\left\{ 
+\begin{array}{l}
+\frac{1}{n}\sum_{i = 1}^{n} ln \frac{k}{X_i}
+\end{array}
+\right\}$
+
+3.    Estimador de Bayes ó bayesiano: asumiremos que es probable cualquier valor de $\pi$
+
+4.    Estimador insesgado de varianza mínima - (Uniformly Minimum-Variance Unbiased Estimator):
+$\hat{\pi}_{UMVUE} = \frac{nk-1}{\sum_{i = 1}^{n} X_i-1}$
+
+
+```{r Solucion}
+# Estimacion de la proporcion de peces en el oceano pacífico
+## Definimos los parámetros para hacer la simulacion
+set.seed(1234)
+
+# pi_verdadero es el valor real del parámetro que queremos estimar, en este caso es la proporcion de la especie de peces en el oceano pacífico $\pi$, contra este valor es que vamos a comparar los estimadores en la simulación, sin este valor no podriamos hacer la validacion del ECM ó del sesgo de la simulación. Si no se conoce el valor pi_verdadero, no es posible usar ECM y tocaría evaluar el rendimiento con otras métricas como varianza, intervalos de confianza o por estudios previos de muestreo.
+pi_verdadero <- 0.3  # Valor verdadero de π (0 < π ≤ 0.5)
+
+# Definimos los 3 escenarios: n = número de barcos, k = número de capturas requeridas
+Escenarios <- list("Escenario 1" = list(n = 10, k = 5),
+                   "Escenario 2" = list(n = 20, k = 9),
+                   "Escenario 3" = list(n = 50, k = 20))
+
+B <- 500  # Número de simulaciones por escenario
+
+# --- Función para el Estimador Bayesiano ó Prior---
+# Calcula la media del posterior con prior uniforme en (0, 0.5)
+media <- function(sum_x, n, k) {
+  post_density <- function(pi) {
+    2 * pi^(n * k) * (1 - pi)^(sum_x - n * k)
+  }
+  norm_const <- integrate(post_density, lower = 0, upper = 0.5)$value
+  num_int <- integrate(function(pi) pi * post_density(pi),
+                         lower = 0, upper = 0.5)$value
+  return(num_int / norm_const)
+}
+
+# --- Definición de los Estimadores Propuestos ---
+
+# 1. Estimador MLE (o basado en la media muestral)
+estimador_mle <- function(data, k) { 
+  k / mean(data) 
+}
+
+# 2. Estimador basado en transformación logarítmica
+# Evitamos usar el nombre "log" para no colisionar con la función base.
+estimador_log <- function(data, k) { 
+  exp(mean(log(k / data))) 
+}
+
+# 3. Estimador Bayesiano
+estimador_bayes <- function(data, k) { 
+  media(sum(data), length(data), k) 
+}
+
+# 4. Estimador UMVUE (insesgado)
+estimador_umvue <- function(data, k) {
+  (length(data) * k - 1) / (sum(data) - 1)
+}
+
+# --- Simulaciones y Comparaciones ---
+result <- list()           # Para almacenar el ECM de cada estimador por escenario
+estimates_all <- data.frame()  # Para recolectar los valores estimados y graficarlos
+
+for (esc in names(Escenarios)) {
+  n <- Escenarios[[esc]]$n
+  k <- Escenarios[[esc]]$k
+  
+  # Matriz para almacenar los valores de cada estimador en cada simulación
+  est <- matrix(NA, nrow = B, ncol = 4)
+  colnames(est) <- c("MLE", "Logaritmo", "Bayes", "UMVUE")
+  
+  for (i in 1:B) {
+    # Generar datos para n barcos:
+    # rnbinom(n, size = k, prob = pi_verdadero) genera el número de fracasos hasta k éxitos.
+    # Sumamos k para obtener el total de capturas.
+    data <- rnbinom(n, size = k, prob = pi_verdadero) + k
+    
+    # Calcular cada uno de los estimadores:
+    est[i, "MLE"]       <- estimador_mle(data, k)
+    est[i, "Logaritmo"] <- estimador_log(data, k)
+    est[i, "Bayes"]     <- estimador_bayes(data, k)
+    est[i, "UMVUE"]     <- estimador_umvue(data, k)
+  }
+  
+  # Calcular el ECM para cada estimador en el escenario actual
+  ECM <- colMeans((est - pi_verdadero)^2)
+  result[[esc]] <- ECM
+  
+  # Convertir a formato largo para graficar
+  df <- as.data.frame(est)  # Se usa "est" (no "estimaciones")
+  df$Simulacion <- 1:B
+  df_long <- pivot_longer(df, cols = c("MLE", "Logaritmo", "Bayes", "UMVUE"),
+                          names_to = "Estimador", values_to = "Valor")
+  df_long$Escenario <- esc
+  estimates_all <- rbind(estimates_all, df_long)
+}
+
+# Mostrar los resultados (ECM) para cada escenario
+for (esc in names(result)) {
+  cat("\nEscenario", esc, "\n")
+  print(result[[esc]])
+}
+
+# --- Graficar la PMF teórica de la distribución negativa binomial para cada escenario ---
+# Esto ilustra la distribución de capturas en un solo barco (para cada k del escenario)
+for (esc in names(Escenarios)) {
+  k_vis <- Escenarios[[esc]]$k
+  x_vals <- k_vis:(k_vis + 40)
+  # dnbinom calcula la probabilidad para el número de fracasos, por ello se usa (x - k_vis)
+  pmf_vals <- dnbinom(round(x_vals - k_vis), size = k_vis, prob = pi_verdadero)
+  df_teorico <- data.frame(Total = x_vals, Probabilidad = pmf_vals)
+  
+  set.seed(123)  # Para reproducibilidad
+  n_sim <- 10000
+  simulados <- rnbinom(n_sim, size = k_vis, prob = pi_verdadero) + k_vis
+  df_sim <- data.frame(Total = simulados)
+  
+  g <- ggplot(df_teorico, aes(x = Total, y = Probabilidad)) +
+    geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+    stat_function(fun = function(x) dnbinom(round(x - k_vis), linewidth = k_vis, prob = pi_verdadero),
+                  color = "red", linewidth = 1) +
+    labs(title = paste("PMF Teórica - Escenario", esc, "(k =", k_vis, ", π =", pi_verdadero, ")"),
+         x = "Número Total de Peces Capturados", y = "Probabilidad") +
+    xlim(k_vis, max(simulados)) +
+    theme_minimal()
+  
+  print(g)
+}
+
+# Construir la tabla ECM utilizando sapply y verificando que cada estimador exista
+ECM_tabla <- data.frame(
+  Escenario   = names(result),
+  n           = sapply(names(result), function(x) Escenarios[[x]]$n),
+  k           = sapply(names(result), function(x) Escenarios[[x]]$k),
+  MLE         = sapply(result, function(x) { if("MLE" %in% names(x)) as.numeric(x["MLE"]) else NA }),
+  Logaritmo   = sapply(result, function(x) { if("Logaritmo" %in% names(x)) as.numeric(x["Logaritmo"]) else NA }),
+  Bayes       = sapply(result, function(x) { if("Bayes" %in% names(x)) as.numeric(x["Bayes"]) else NA }),
+  UMVUE       = sapply(result, function(x) { if("UMVUE" %in% names(x)) as.numeric(x["UMVUE"]) else NA }),
+  stringsAsFactors = FALSE
+)
+
+
+# Resumen de EMC de el desempeño de los estimadores en cada escenario planteado
+if(requireNamespace("knitr", quietly = TRUE)){
+  knitr::kable(ECM_tabla, caption = "ECM de cada estimador por escenario, donde n = número de barcos, k = número de capturas requeridas")
+} else {
+  print(ECM_tabla)
+}
+
+```
+
+## Conclusiones
+
+En el ejercicio propuse 4 etimadores: el de mediana muestral o momentos (MLE) y su version insesgada UMVUE o de varianza mínima, el de transformación Logaritmica y el Bayesiano.
+
+Se plantearon 3 escenarios diferentes y se realizáron las simulaciones respectivas.
+Obsevamos que segun el ECM:
+
+*   Los estimadores basados en la media muestral (MLE y UMVUE) son los de mejor desempeño.
+
+*   Los estimadores basados en la media muestral (MLE y UMVUE) se comportan de manera muy similar.
+
+*   Los estimadores basados en la media muestral (MLE y UMVUE) mejoran en consistencia a medida que las muesras $k$ aumentan.
+
+*   El estimador basado en transformación logarítmica mejora igual a medida que las muestras sonmas grandes pero mantiene un ECM superior y eso significa menor eficiencia.
+
+*   El estimador bayesiano no presenta resultados en todos los escenarios y puede signiicar que necesita mayor verificacion o una seleccion del pior nueva o que este estimador no es suficientemente robusto para este muestreo en particular.
+
+# SITUACION 2
+Suponga que se tiene una muestra aleatoria de tamaño $2n$ tomada de una población $X$, con $E(X) = \mu$ y $Var(X) = \sigma²$, Sean:
+
+$$\overline{X}_1 = \frac{1}{2n} \sum_{i=1}^{2n}x_i\quad \text{y}\quad \overline{X}_2 = \frac{1}{n} \sum_{i=1}^{n}x_i$$
+dos estimadores de $\mu$.
+
+*   ¿Cuál es le mejor estimador de $\mu$?
+
+*   Simule una situación con 1000 muestras de tal forma que se pueda evidenciar de manera gráfica cual de los dos estimados es mejor.
+
+
+
+
+# Notas
+
+## Reglas básicas de Logaritmos:
+*   Producto: $log(ab) = log(a) + log(b)$
+*   Cociente: $log(\frac{a}{b}) = log(a) - log(b)$
+*   Potencia: $log(a^r) = {r}{log(a)}$
+*   Logaritmo de 1: $log(1) = 0$
+*   Cambio de base: $log_b(a)=\frac{log_c(a)}{log_c(b)^,}$
+>>>>>>> 6cc3ef8 (Final desafio 1)
