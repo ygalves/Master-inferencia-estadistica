@@ -228,5 +228,128 @@ if(requireNamespace("knitr", quietly = TRUE)){
   print(ECM_tabla)
 }
 
+###############################################################################
+# Estimación de θ (número total de vehículos piratas)
+#
+# La población consiste en vehículos numerados consecutivamente: 1,2,...,θ.
+# Se extrae una muestra aleatoria de tamaño n (sin reemplazo) y se registran los
+# números observados: X1, X2, …, Xn.
+#
+# Se proponen los siguientes estimadores:
+#
+#   (1)   θ̂(1) = 2·X̄ - 1
+#          (porque E(X) = (θ+1)/2 para X ~ Uniforme{1, …, θ})
+#
+#   (2)   θ̂(2) = X_(n) + X_(1) - 1
+#
+#   (3)   θ̂(3) = X_max + d̄, donde d̄ es la media de los saltos consecutivos.
+#          Al ordenar la muestra: d̄ = (X_(n) - X_(1))/(n-1), de modo que
+#          θ̂(3) = X_(n) + (X_(n) - X_(1))/(n-1)
+#
+#   (4)   θ̂(4) = 2·Med(X) - 1
+#
+#   (5)   θ̂(5) = X̄ + 3·S
+#
+# Se simula el comportamiento de estos estimadores para diferentes escenarios
+# variando el valor real de θ y el tamaño de muestra n.
+###############################################################################
+
+# Cargar las librerías necesarias
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(gridExtra)
+
+# Parámetros de simulación
+set.seed(1234)
+theta_true <- 200    # Valor real de θ (número total de vehículos)
+n <- 10              # Tamaño de la muestra (n vehículos observados)
+B <- 5000            # Número de réplicas de la simulación
+
+# Inicializamos vectores para almacenar los valores de cada estimador
+est1 <- numeric(B)   # Estimador (1): 2*mean - 1
+est2 <- numeric(B)   # Estimador (2): min + max - 1
+est3 <- numeric(B)   # Estimador (3): max + (max - min)/(n-1)
+est4 <- numeric(B)   # Estimador (4): 2*median - 1
+est5 <- numeric(B)   # Estimador (5): mean + 3*sd
+
+# Simulación: Para cada réplica se extrae una muestra aleatoria de tamaño n de {1,2,...,θ}
+for (i in 1:B) {
+  muestra <- sample(1:theta_true, size = n, replace = FALSE)
+  
+  # Calcular cada uno de los estimadores:
+  est1[i] <- 2 * mean(muestra) - 1
+  est2[i] <- min(muestra) + max(muestra) - 1
+  est3[i] <- max(muestra) + (max(muestra) - min(muestra)) / (n - 1)
+  est4[i] <- 2 * median(muestra) - 1
+  est5[i] <- mean(muestra) + 3 * sd(muestra)
+}
+
+# Crear un data frame con los resultados de las simulaciones y convertir a formato largo
+df <- data.frame(
+  Replication = 1:B,
+  `θ1` = est1,
+  `θ2` = est2,
+  `θ3` = est3,
+  `θ4` = est4,
+  `θ5` = est5
+)
+
+
+df_long <- pivot_longer(df, cols = -Replication, 
+                        names_to = "Estimator", values_to = "Value")
+# Convertir la variable Estimator a factor (usando los valores observados)
+df_long$Estimator <- as.factor(df_long$Estimator)
+
+# Graficar las densidades de cada estimador (facetas) con la línea vertical en θ_true
+p_dens <- ggplot(df_long, aes(x = Value, fill = Estimator)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~ Estimator, scales = "free") +
+  geom_vline(xintercept = theta_true, linetype = "dashed", color = "black", linewidth = 1) +
+  labs(title = "Distribución de los Estimadores para θ",
+       subtitle = paste("θ verdadero =", theta_true, "| Tamaño de muestra n =", n),
+       x = "Valor estimado de θ", y = "Densidad") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+print(p_dens)
+
+# Calcular sesgo, varianza y ECM para cada estimador y construir una tabla resumen
+summary_table <- df_long %>%
+  group_by(Estimator) %>%
+  summarise(
+    Bias = round(mean(Value) - theta_true, 3),
+    Variance = round(var(Value), 3),
+    ECM = round((mean(Value) - theta_true)^2 + var(Value), 3)
+  )
+
+# Imprimir la tabla resumen con knitr::kable
+kable(summary_table, digits = 3, caption = "Resumen de los Estimadores: Sesgo, Varianza y ECM")
+
+# Graficar barras comparativas para Bias (valor absoluto), Varianza y ECM
+p_bias <- ggplot(summary_table, aes(x = Estimator, y = abs(Bias), fill = Estimator)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Bias Absoluto de cada Estimador", y = "Bias Absoluto", x = "Estimador") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+
+p_variance <- ggplot(summary_table, aes(x = Estimator, y = Variance, fill = Estimator)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Varianza de cada Estimador", y = "Varianza", x = "Estimador") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+
+p_ecm <- ggplot(summary_table, aes(x = Estimator, y = ECM, fill = Estimator)) +
+  geom_bar(stat = "identity") +
+  labs(title = "ECM de cada Estimador", y = "ECM", x = "Estimador") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+
+# Combinar las tres gráficas en un panel vertical
+grid.arrange(p_bias, p_variance, p_ecm, ncol = 1)
+
+
+
+
 
 

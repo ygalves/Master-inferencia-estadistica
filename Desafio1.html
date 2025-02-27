@@ -1271,9 +1271,20 @@ S_n\)</span> se necesita calcular teoricamente el sesgo y el ECM del
 estimador dado: <span class="math inline">\(\hat{\lambda}=\frac{n-1}{S_n}\)</span>.</li>
 <li>Se necesita calcular el estimador de momentos y el estimador de
 máxima verosimilitud para el ejercicio.</li>
-<li>El ejercicio indica que cada <span class="math inline">\(X_i\)</span> tiene una densidad <span class="math inline">\(f(x) = \lambda e^{\lambda x},(x \geq
-0),\)</span></li>
+<li>El ejercicio indica que cada <span class="math inline">\(X_i\)</span> tiene una densidad <span class="math inline">\(f(x) = \lambda e^{\lambda x},(x \geq 0),\)</span>
+y dado que el estimador propuesto <span class="math inline">\(\hat{\lambda}=\frac{n-1}{S_n}\)</span> y ya que el
+objetivo es estimar los tiempos muertos entre las llamadas al call
+center, podemos deducir que en este ejercicio los datos a evaluar se
+distinguen como una <strong>Distribución exponencial<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a></strong></li>
+<li>Para este análisis vamos a valcular la esperanza</li>
 </ul>
+<pre class="r"><code>###############################################################################
+# Evaluar las propiedades de los estimadores de los tiempos de atencion en call center
+#
+#
+# Se simula el comportamiento de estos estimadores para diferentes escenarios
+# variando el valor real de θ y el tamaño de muestra n.
+###############################################################################</code></pre>
 </div>
 </div>
 <div id="section-8" class="section level1">
@@ -1304,6 +1315,7 @@ log(b)\)</span></li>
 <li id="fn3"><p><a href="https://es.statisticseasily.com/glosario/%C2%BFQu%C3%A9-es-la-distribuci%C3%B3n-binomial-negativa%3F/#" class="uri">https://es.statisticseasily.com/glosario/%C2%BFQu%C3%A9-es-la-distribuci%C3%B3n-binomial-negativa%3F/#</a><a href="#fnref3" class="footnote-back">↩︎</a></p></li>
 <li id="fn4"><p><a href="https://economipedia.com/definiciones/teorema-central-del-limite.html" class="uri">https://economipedia.com/definiciones/teorema-central-del-limite.html</a><a href="#fnref4" class="footnote-back">↩︎</a></p></li>
 <li id="fn5"><p><a href="https://es.wikipedia.org/wiki/Distribuci%C3%B3n_uniforme_discreta" class="uri">https://es.wikipedia.org/wiki/Distribuci%C3%B3n_uniforme_discreta</a><a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p><a href="https://mundoteca.org/distribuciones-exponenciales-y-sus-caracteristicas/" class="uri">https://mundoteca.org/distribuciones-exponenciales-y-sus-caracteristicas/</a><a href="#fnref6" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 
