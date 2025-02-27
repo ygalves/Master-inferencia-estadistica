@@ -7,6 +7,7 @@
 <h3>02/22/2025 CALI - COLOMBIA</strong></h3>
 # ------------------------------
 
+<h3><strong>MAESTRIÍA EN INTELIGENCIA ARTIFICIAL Y CIENCIA DE DATOS</strong></h3>
 <h3><strong>INFERENCIA ESTADISTICA</strong></h3>
 
 <h3><strong>ENTREGA: </strong> DESAFÍO 1</h3>
@@ -603,7 +604,8 @@ $$f_z(z) = \frac{z^{n-1}e^{-z}}{(n-1)!},\;z \geq 0$$
 *   Utilizando la transformación $Z = \lambda S_n$ se necesita calcular teoricamente el sesgo y el ECM del estimador dado: $\hat{\lambda}=\frac{n-1}{S_n}$.
 *   Se necesita calcular el estimador de momentos y el estimador de máxima verosimilitud para el ejercicio.
 *   El ejercicio indica que cada $X_i$ tiene una densidad $f(x) = \lambda e^{\lambda x},(x \geq 0),$ y dado que el estimador propuesto $\hat{\lambda}=\frac{n-1}{S_n}$ y ya que el objetivo es estimar los tiempos muertos entre las llamadas al call center, podemos deducir que en este ejercicio los datos a evaluar se distinguen como una **Distribución exponencial^[https://mundoteca.org/distribuciones-exponenciales-y-sus-caracteristicas/]**
-*   Para este análisis vamos a valcular la esperanza 
+*   Para este análisis vamos a valcular la esperanza para despejar en la fórmula de la densidad
+
  
 ```{r}
 ###############################################################################
