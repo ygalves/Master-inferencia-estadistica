@@ -181,7 +181,7 @@ Escenarios <- list("Escenario 1" = list(n = 10, k = 5),
                    "Escenario 2" = list(n = 20, k = 9),
                    "Escenario 3" = list(n = 50, k = 20))
 
-B <- 500  # Número de simulaciones por escenario
+B <- 5000  # Número de simulaciones por escenario
 
 # --- Función para el Estimador Bayesiano ó Prior---
 # Calcula la media del posterior con prior uniforme en (0, 0.5)
@@ -574,6 +574,18 @@ grid.arrange(p_bias, p_variance, p_ecm, ncol = 1)
 
 ```
 
+## Conclusiones
+  *   El indicador $\theta_4$ presenta un sesgo cercano a cero $(0.04)$ lo cual es el ideal pero la varianza es la mas alta de todos $(2856.68)$ y nos indica que los valores estimados tienen variaciones altas entre una muestra y la otra.
+  *   El indicador $\theta_5$ presenta el sesgo mas elevado $(71.79)$ y una varianza alta $(1064.25)$ aunque la varianza está entre la media de todos el alto sesgo nos indica que no es un estimador muy adecuado para la implementacion.
+  *   Los indicadores $\theta_1$ y $\theta_2$ presentan los sesgos mas bájos $(0.22)$ y $(0.23)$ respectivamente, pero la varianza de $\theta_1$ es alta $(1234.53)$ mientras la varianza de $\theta_2$ es moderada pero no es la mas baja de entre todos los indicadores $(562.23)$
+  *   El indicador $\theta_3$ presenta un sesgo bajo y aunque no es el menor de todos los estimadores si es cercano a 0: $(1.08)$ además si tiene el valor de varianza mas bajo de todo el set $(306.33)$.
+  *   El ECM es la sumatoria del cuadrado del sesgo y la varianza y refleja el desempeño o presicion global del estimador, tomando en cuenta esto el ECM más bajo es de $\theta_3$ con $(307.49)$ lo cual nos indica que a pesar de que el sesgo no es el mas bájo la combinacion de este y la poca varianza hacen este indicador como el mejor en precision global.
+  *   Los estimadores $\theta_1, \theta_4 y \theta_5$ tiene ECMs muy altos $(1234.58, 2856.68, 6212.32)$ respectivamente y esto indica que no sin importar el bajo sesgo, la alta varianza los convierte en inadecuados.
+  *   El estimador $\theta_2$ tiene igualmente un ECM bajo $(562.28)$, tiene tambien bajo sesgo $(0.23)$ y una varianza moderada $(562.23)$ pero el ECM es mayor que el ECM de $\theta_3$ con $(307.45)$, con lo cual concluimos que $\theta_2$ es un buen indicador.
+
+La mejor estimación de $\theta$ se logra usando el estimador $\hat{\theta_3} = X_{max} + \frac{X_{max} -X_{min}}{n-1}$, esto a que este presenta la mejor precision global $(307.49)$ manteniendo un sesgo cercano a cero $(1.08)$ y la varianza mas baja $(306.33)$, ahora bien este desafio necesita estimar un valor desconocido de $\theta$ por tanto una baja varianza nos ayuda a estimar un valor que sea mas cercano al valor real de $\theta$.
+
+
 # ------------------------------
 # SITUACIÓN 4
 
@@ -584,6 +596,14 @@ $$f_z(z) = \frac{z^{n-1}e^{-z}}{(n-1)!},\;z \geq 0$$
 *   Utilice esto para calcular el sesgo y el ECM de $\hat{\lambda}=\frac{n-1}{S_n}$.
 
 *   Calcule el estimados de momentos y máximo verosímil para la función de densidad.
+
+## Entendiendo el Problema
+
+*   En un callcenter de una empresa de seguros, se necesita evaluar las propiedades de los estimadores de los tiempos de atención entre llamadas de reclamaciones para la densidad $f_z(z) = \frac{z^{n-1}e^{-z}}{(n-1)!},\;z \geq 0$
+*   Utilizando la transformación $Z = \lambda S_n$ se necesita calcular teoricamente el sesgo y el ECM del estimador dado: $\hat{\lambda}=\frac{n-1}{S_n}$.
+*   Se necesita calcular el estimador de momentos y el estimador de máxima verosimilitud para el ejercicio.
+*   El ejercicio indica que cada $X_i$ tiene una densidad $f(x) = \lambda e^{\lambda x},(x \geq 0),$
+
 
 ```{r}
 
@@ -603,13 +623,3 @@ $$f_z(z) = \frac{z^{n-1}e^{-z}}{(n-1)!},\;z \geq 0$$
 
 
 =======
-```{r}
-plot(cars)
-```
-
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
->>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
