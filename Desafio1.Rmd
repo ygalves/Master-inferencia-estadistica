@@ -138,7 +138,7 @@ $$Esperanza=\mathbb{E}[X]=\frac{k}{\pi}$$
 
 $$Varianza=Var(X)=\frac{k(1−\pi)}{\pi²}$$
 
-*   Es necesario definir el valor real de la proporción de  peces en el oceano de la especie buscada ($\pi$) y a este se le denominará como $\pi_{verdadero}$, ese valor que ya se conoce como correcto no va ha permitir comparar los estimadores en la simulaciones ó en los diferentes escenarios propuestos y luego comparar los resultados con el valor real para saber la precisión y consistencia de los diferentes estimadores.
+*   Es necesario definir el valor real de la proporción de  peces en el oceano de la especie buscada ($\pi$) y a este se le denominará como $\pi_{verdadero}$, ese valor que ya se conoce como correcto nos va ha permitir comparar los estimadores en la simulaciones ó en los diferentes escenarios propuestos y luego comparar los resultados con el valor real para saber la precisión y consistencia de los diferentes estimadores.
 
 *   Si no conocemos a $\pi_{verdadero}$ y es lo que realmente sucede en la vida real, para las simulaciones establecemos el valor a un estimado para poder realizar los análisis necesarios a los estimadores o en su defecto se evaluan los estimadores usando tecnicas diferentes a ECM tal como usar la varianza, usar los intervalos de confianza, estudios de remuestreo, etc.
 
