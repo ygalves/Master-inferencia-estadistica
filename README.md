@@ -3,18 +3,15 @@
 <img src="https://apps.uao.edu.co/apex/estudiantes/r/files/static/v370Y/logo_uao.png" width="15%"/>
 
 <h2>UNIVERSIDAD AUTÓNOMA DE OCCIDENTE</strong></h2>
-
 <h3>02/22/2025 CALI - COLOMBIA</strong></h3>
-
 <h3><strong>MAESTRIA EN INTELIGENCIA ARTIFICIAL Y CIENCIA DE DATOS</strong></h3>
-
 <h3><strong>INFERENCIA ESTADISTICA</strong></h3>
-
 <h3><strong>ENTREGA: </strong> DESAFÍO 1</h3>
-
 <li><strong>Profesor:</strong> Cristian E García</li>
 <li><strong>Alumno:</strong> Yoniliman Galvis Aguirre</li>
 <li><strong>Código:</strong> 22500214</li>
+
+---
 
 Este repositorio presenta el notebook de Rstudio, **Desafio1.Rmd** que contiene el código en R y la sustentacion teórica en markdwon del primer taller de la clase de inferencia estadística y **desafio1.R**  para sólo el código.
 Para los usuarios que no deseen o no tengan RStudio pueden ver el notebook usando el archivo **Desafio1.html** desde cualquier browser.
