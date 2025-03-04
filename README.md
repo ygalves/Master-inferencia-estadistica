@@ -16,7 +16,10 @@
 <li><strong>Alumno:</strong> Yoniliman Galvis Aguirre</li>
 <li><strong>Código:</strong> 22500214</li>
 
-Este repositorio incluye 2 archivos importantes que necesitarán de RStudio para que puedan ser vistos correctamente:
+Este repositorio presenta el notebook de Rstudio, **Desafio1.Rmd** que contiene el código en R y la sustentacion teórica en markdwon del primer taller de la clase de inferencia estadística y **desafio1.R**  para sólo el código.
+Para los usuarios que no deseen o no tengan RStudio pueden ver el notebook usando el archivo **Desafio1.html** desde cualquier browser.
+
+Para quienes quieren ver el archivo usando RStudio y no lo han podido hacer, necesitarán de RStudio y un complemento, esta es una breve guia para usuarios de linux/ubuntu 22.04 y de esta forma puedan ver el notebook correctamente:
 
 ### Install R language in Linux Ubuntu 22.04
 #### Update System
