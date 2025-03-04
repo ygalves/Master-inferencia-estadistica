@@ -604,17 +604,79 @@ $$f_z(z) = \frac{z^{n-1}e^{-z}}{(n-1)!},\;z \geq 0$$
 *   Utilizando la transformación $Z = \lambda S_n$ se necesita calcular teoricamente el sesgo y el ECM del estimador dado: $\hat{\lambda}=\frac{n-1}{S_n}$.
 *   Se necesita calcular el estimador de momentos y el estimador de máxima verosimilitud para el ejercicio.
 *   El ejercicio indica que cada $X_i$ tiene una densidad $f(x) = \lambda e^{\lambda x},(x \geq 0),$ y dado que el estimador propuesto $\hat{\lambda}=\frac{n-1}{S_n}$ y ya que el objetivo es estimar los tiempos muertos entre las llamadas al call center, podemos deducir que en este ejercicio los datos a evaluar se distinguen como una **Distribución exponencial^[https://mundoteca.org/distribuciones-exponenciales-y-sus-caracteristicas/]**
-*   Para este análisis vamos a valcular la esperanza para despejar en la fórmula de la densidad
+*   Para este análisis de este ejercicio vamos a utilizar las propiedades de la esperanza porque estamos iniciando desde que $S_n$ tiene una distribución Gamma y por eso es que $$E\left(\frac{1}{S_n}\right)=\frac{\lambda}{n-1},$$
 
  
 ```{r}
-###############################################################################
-# Evaluar las propiedades de los estimadores de los tiempos de atencion en call center
-#
-#
-# Se simula el comportamiento de estos estimadores para diferentes escenarios
-# variando el valor real de θ y el tamaño de muestra n.
-###############################################################################
+# Configuración inicial
+set.seed(123)           # Para reproducibilidad
+M <- 10000              # Número de simulaciones
+n <- 10                 # Tamaño muestral (n > 2)
+lambda_true <- 2        # Valor real de lambda
+
+# Inicializar vectores para almacenar los estimadores
+lambda_hat_prop <- numeric(M)  # Estimador propuesto: (n-1)/S_n
+lambda_hat_MLE  <- numeric(M)  # Estimador MLE (y de momentos): n/S_n = 1/mean(X)
+
+# Simulación de los experimentos
+for(i in 1:M){
+  # Generar n tiempos de atención de una exponencial con parámetro lambda_true
+  X <- rexp(n, rate = lambda_true)
+  S_n <- sum(X)
+  
+  # Estimador propuesto: (n-1)/S_n
+  lambda_hat_prop[i] <- (n - 1) / S_n
+  
+  # Estimador MLE y de momentos: n/S_n = 1/mean(X)
+  lambda_hat_MLE[i] <- n / S_n
+}
+
+# Cálculo de sesgo, varianza y ECM para cada estimador
+bias_prop <- mean(lambda_hat_prop) - lambda_true
+var_prop  <- var(lambda_hat_prop)
+mse_prop  <- mean((lambda_hat_prop - lambda_true)^2)
+
+bias_MLE <- mean(lambda_hat_MLE) - lambda_true
+var_MLE  <- var(lambda_hat_MLE)
+mse_MLE  <- mean((lambda_hat_MLE - lambda_true)^2)
+
+cat("Resultados:\n")
+cat("Estimador propuesto ((n-1)/S_n):\n")
+cat("  Sesgo =", bias_prop, "\n")
+cat("  Varianza =", var_prop, "\n")
+cat("  ECM =", mse_prop, "\n\n")
+cat("Estimador MLE (n/S_n = 1/mean(X)):\n")
+cat("  Sesgo =", bias_MLE, "\n")
+cat("  Varianza =", var_MLE, "\n")
+cat("  ECM =", mse_MLE, "\n")
+
+# Cargar librerías para gráficos
+library(ggplot2)
+library(reshape2)
+
+# Crear un data frame con los estimadores
+df <- data.frame(`(n-1)/S_n` = lambda_hat_prop, `n/S_n` = lambda_hat_MLE)
+df_melt <- melt(df, variable.name = "Estimador", value.name = "Valor")
+
+# Histograma superpuesto de los estimadores
+p1 <- ggplot(df_melt, aes(x = Valor, fill = Estimador)) +
+  geom_histogram(alpha = 0.5, bins = 50, position = "identity") +
+  geom_vline(xintercept = lambda_true, linetype = "dashed", color = "black", size = 1) +
+  labs(title = "Distribución de los Estimadores de λ",
+       x = "Valor Estimado de λ", y = "Frecuencia") +
+  theme_minimal()
+
+# Boxplot comparativo de los estimadores
+p2 <- ggplot(df_melt, aes(x = Estimador, y = Valor, fill = Estimador)) +
+  geom_boxplot(alpha = 0.7) +
+  geom_hline(yintercept = lambda_true, linetype = "dashed", color = "black", size = 1) +
+  labs(title = "Boxplot de los Estimadores de λ",
+       x = "Estimador", y = "Valor Estimado de λ") +
+  theme_minimal()
+
+# Mostrar los gráficos
+print(p1)
+print(p2)
 ```
 
 
