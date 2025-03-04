@@ -423,6 +423,9 @@ ECM_tabla <- data.frame(
 kable(ECM_tabla, caption = "ECM (Varianza empírica) de cada estimador")
 
 ```
+## Conclusiones
+*   El análisis en la gráfica y la teoría nos demuestra que el mejor estimador de $\mu$ es $\overline{X}_1$ ya que este utiliza los $2n$ datos y presenta una varianza $\frac{\sigma²}{(2n)}$ y esa es menor que la varianza de $\overline{X}_2 = \frac{\sigma²}{(n)}$, porque esta solo utiliza la primera mitad de lso datos $n$.
+*   Se demuestra entonces de forma teórica y de forma gráfica que ql estimador de mejor desempeño será siempre aquel que utiliza toda la muestra de datos y no solo una parte de ella.
 
 # ------------------------------
 # SITUACIÓN 3

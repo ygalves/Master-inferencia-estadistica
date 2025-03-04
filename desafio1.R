@@ -88,7 +88,6 @@ library(tidyr)
 # -------------------------------
 # SITUACION 1
 # -------------------------------
-
 # Estimacion de la proporcion de peces en el oceano pacífico
 ## Definimos los parámetros para hacer la simulacion
 set.seed(1234)
@@ -101,7 +100,7 @@ Escenarios <- list("Escenario 1" = list(n = 10, k = 5),
                    "Escenario 2" = list(n = 20, k = 9),
                    "Escenario 3" = list(n = 50, k = 20))
 
-B <- 500  # Número de simulaciones por escenario
+B <- 5000  # Número de simulaciones por escenario
 
 # --- Función para el Estimador Bayesiano ó Prior---
 # Calcula la media del posterior con prior uniforme en (0, 0.5)
@@ -187,7 +186,7 @@ for (esc in names(result)) {
 for (esc in names(Escenarios)) {
   k_vis <- Escenarios[[esc]]$k
   x_vals <- k_vis:(k_vis + 40)
-  # dnbinom calcula la probabilidad para el número de fracasos, por ello se usa (x - k_vis)
+  # Redondeamos para asegurarnos de tener valores enteros en la función dnbinom
   pmf_vals <- dnbinom(round(x_vals - k_vis), size = k_vis, prob = pi_verdadero)
   df_teorico <- data.frame(Total = x_vals, Probabilidad = pmf_vals)
   
@@ -198,11 +197,11 @@ for (esc in names(Escenarios)) {
   
   g <- ggplot(df_teorico, aes(x = Total, y = Probabilidad)) +
     geom_bar(stat = "identity", fill = "skyblue", color = "black") +
-    stat_function(fun = function(x) dnbinom(round(x - k_vis), linewidth = k_vis, prob = pi_verdadero),
-                  color = "red", linewidth = 1) +
+    geom_line(data = df_teorico, aes(x = Total, y = Probabilidad),
+              color = "red", size = 1) +
     labs(title = paste("PMF Teórica - Escenario", esc, "(k =", k_vis, ", π =", pi_verdadero, ")"),
          x = "Número Total de Peces Capturados", y = "Probabilidad") +
-    xlim(k_vis, max(simulados)) +
+    xlim(c(k_vis, k_vis + 40)) +
     theme_minimal()
   
   print(g)
@@ -227,6 +226,102 @@ if(requireNamespace("knitr", quietly = TRUE)){
 } else {
   print(ECM_tabla)
 }
+
+# -------------------------------
+## Conclusiones
+# -------------------------------
+
+# En el ejercicio propuse 4 etimadores: el de mediana muestral o momentos (MLE) y su version insesgada UMVUE o de varianza mínima, el de transformación Logaritmica y el Bayesiano.
+# Se plantearon 3 escenarios diferentes y se realizáron las simulaciones respectivas.
+# Obsevamos que segun el ECM:
+  
+# *   Los estimadores basados en la media muestral (MLE y UMVUE) son los de mejor desempeño.
+# *   Los estimadores basados en la media muestral (MLE y UMVUE) se comportan de manera muy similar.
+# *   Los estimadores basados en la media muestral (MLE y UMVUE) mejoran en consistencia a medida que las muesras $k$ aumentan.
+# *   El estimador basado en transformación logarítmica mejora igual a medida que las muestras sonmas grandes pero mantiene un ECM superior y eso significa menor eficiencia.
+# *   El estimador bayesiano no presenta resultados en todos los escenarios y puede signiicar que necesita mayor verificacion o una seleccion del pior nueva o que este estimador no es suficientemente robusto para este muestreo en particular.
+
+
+# -------------------------------
+# SITUACION 2
+# -------------------------------
+
+###############################################################################
+# Estimación de la Media de una Población
+# Comparación de dos estimadores:
+#   X1 = (1/(2n)) * Σ x_i (usa 2n datos)
+#   X2 = (1/n)  * Σ x_i (usa solo los primeros n datos)
+#
+# Se evidenciará que X1 es mejor ya que tiene menor varianza.
+###############################################################################
+
+# Cargar las librerías necesarias
+library(ggplot2)
+library(knitr)
+
+# Parámetros de la simulación
+set.seed(123)                # La semilla para grantizar la reproducibilidad
+n <- 50                      # tamaño de la muestra
+N <- 2 * n                   # Tamaño total de la muestra
+mu <- 10                     # Media de la poblacion
+sigma <- 2                   # Desviación estándarde la poblacion
+replicaciones <- 1000        # Número de muestras para la simulacion
+
+# Creamos los vectores para almacenar los estimadores
+X1 <- numeric(replicaciones) # Estimador que usa 2n datos (todos)
+X2 <- X1  # Estimador que solo usa el primer set de datos
+
+# Simulación: en cada réplica se extrae una muestra de tamaño 2n de la población
+for(i in 1:replicaciones){
+  sample_data <- rnorm(N, mean = mu, sd = sigma)
+  X1[i] <- mean(sample_data)        # Usa todos los 2n datos
+  X2[i] <- mean(sample_data[1:n])     # Usa solo los primeros n datos
+}
+
+# Calcular las varianzas empíricas (ECM, pues son insesgados)
+ecm_X1 <- var(X1)   # Teóricamente: sigma^2/(2n) = (4)/(100) = 0.04
+ecm_X2 <- var(X2)   # Teóricamente: sigma^2/n   = (4)/(50)  = 0.08
+
+cat("Varianza (ECM) de X1 (2n datos):", ecm_X1, "\n")
+cat("Varianza (ECM) de X2 (n datos):", ecm_X2, "\n")
+
+# Crear un data frame para graficar las densidades de ambos estimadores
+df <- data.frame(
+  Estimador = factor(c(rep("X1 (2n datos)", length(X1)), rep("X2 (n datos)", length(X2)))),
+  Valor = c(X1, X2)
+)
+
+# Gráfica comparativa: densidades de los estimadores y línea vertical en mu
+g <- ggplot(df, aes(x = Valor, fill = Estimador)) +
+  geom_density(alpha = 0.5) +
+  geom_vline(xintercept = mu, linetype = "dashed", color = "black", linewidth = 1) +
+  labs(title = "Comparación de Estimadores de la Media",
+       subtitle = "X1: usa 2n datos vs. X2: usa n datos",
+       x = "Valor estimado de μ", y = "Densidad") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme_minimal()
+
+print(g)
+
+# Tabla de resumen usando knitr::kable
+ECM_tabla <- data.frame(
+  Estimador = c("X1 (2n datos)", "X2 (n datos)"),
+  ECM = c(ecm_X1, ecm_X2)
+)
+
+# Imprimir la tabla
+kable(ECM_tabla, caption = "ECM (Varianza empírica) de cada estimador")
+
+# -------------------------------
+## Conclusiones
+# -------------------------------
+# *   El análisis en la gráfica y la teoría nos demuestra que el mejor estimador de $\mu$ es $\overline{X}_1$ ya que este utiliza los $2n$ datos y presenta una varianza $\frac{\sigma²}{(2n)}$ y esa es menor que la varianza de $\overline{X}_2 = \frac{\sigma²}{(n)}$, porque esta solo utiliza la primera mitad de lso datos $n$.
+# *   Se demuestra entonces de forma teórica y de forma gráfica que ql estimador de mejor desempeño será siempre aquel que utiliza toda la muestra de datos y no solo una parte de ella.
+
+
+# -------------------------------
+# SITUACION 3
+# -------------------------------
 
 ###############################################################################
 # Estimación de θ (número total de vehículos piratas)
@@ -348,7 +443,101 @@ p_ecm <- ggplot(summary_table, aes(x = Estimator, y = ECM, fill = Estimator)) +
 # Combinar las tres gráficas en un panel vertical
 grid.arrange(p_bias, p_variance, p_ecm, ncol = 1)
 
+# -------------------------------
+## Conclusiones
+# -------------------------------
 
+# *   El indicador $\theta_4$ presenta un sesgo cercano a cero $(0.04)$ lo cual es el ideal pero la varianza es la mas alta de todos $(2856.68)$ y nos indica que los valores estimados tienen variaciones altas entre una muestra y la otra.
+# *   El indicador $\theta_5$ presenta el sesgo mas elevado $(71.79)$ y una varianza alta $(1064.25)$ aunque la varianza está entre la media de todos el alto sesgo nos indica que no es un estimador muy adecuado para la implementacion.
+# *   Los indicadores $\theta_1$ y $\theta_2$ presentan los sesgos mas bájos $(0.22)$ y $(0.23)$ respectivamente, pero la varianza de $\theta_1$ es alta $(1234.53)$ mientras la varianza de $\theta_2$ es moderada pero no es la mas baja de entre todos los indicadores $(562.23)$
+# *   El indicador $\theta_3$ presenta un sesgo bajo y aunque no es el menor de todos los estimadores si es cercano a 0: $(1.08)$ además si tiene el valor de varianza mas bajo de todo el set $(306.33)$.
+# *   El ECM es la sumatoria del cuadrado del sesgo y la varianza y refleja el desempeño o presicion global del estimador, tomando en cuenta esto el ECM más bajo es de $\theta_3$ con $(307.49)$ lo cual nos indica que a pesar de que el sesgo no es el mas bájo la combinacion de este y la poca varianza hacen este indicador como el mejor en precision global.
+# *   Los estimadores $\theta_1, \theta_4 y \theta_5$ tiene ECMs muy altos $(1234.58, 2856.68, 6212.32)$ respectivamente y esto indica que no sin importar el bajo sesgo, la alta varianza los convierte en inadecuados.
+# *   El estimador $\theta_2$ tiene igualmente un ECM bajo $(562.28)$, tiene tambien bajo sesgo $(0.23)$ y una varianza moderada $(562.23)$ pero el ECM es mayor que el ECM de $\theta_3$ con $(307.45)$, con lo cual concluimos que $\theta_2$ es un buen indicador.
+# La mejor estimación de $\theta$ se logra usando el estimador $\hat{\theta_3} = X_{max} + \frac{X_{max} -X_{min}}{n-1}$, esto a que este presenta la mejor precision global $(307.49)$ manteniendo un sesgo cercano a cero $(1.08)$ y la varianza mas baja $(306.33)$, ahora bien este desafio necesita estimar un valor desconocido de $\theta$ por tanto una baja varianza nos ayuda a estimar un valor que sea mas cercano al valor real de $\theta$.
+
+
+# -------------------------------
+# SITUACION 4
+# -------------------------------
+
+# Configuración inicial
+set.seed(123)           # Para reproducibilidad
+M <- 10000              # Número de simulaciones
+n <- 10                 # Tamaño muestral (n > 2)
+lambda_true <- 2        # Valor real de lambda
+
+# Inicializar vectores para almacenar los estimadores
+lambda_hat_prop <- numeric(M)  # Estimador propuesto: (n-1)/S_n
+lambda_hat_MLE  <- numeric(M)  # Estimador MLE (y de momentos): n/S_n = 1/mean(X)
+
+# Simulación de los experimentos
+for(i in 1:M){
+  # Generar n tiempos de atención de una exponencial con parámetro lambda_true
+  X <- rexp(n, rate = lambda_true)
+  S_n <- sum(X)
+  
+  # Estimador propuesto: (n-1)/S_n
+  lambda_hat_prop[i] <- (n - 1) / S_n
+  
+  # Estimador MLE y de momentos: n/S_n = 1/mean(X)
+  lambda_hat_MLE[i] <- n / S_n
+}
+
+# Cálculo de sesgo, varianza y ECM para cada estimador
+bias_prop <- mean(lambda_hat_prop) - lambda_true
+var_prop  <- var(lambda_hat_prop)
+mse_prop  <- mean((lambda_hat_prop - lambda_true)^2)
+
+bias_MLE <- mean(lambda_hat_MLE) - lambda_true
+var_MLE  <- var(lambda_hat_MLE)
+mse_MLE  <- mean((lambda_hat_MLE - lambda_true)^2)
+
+# Crear una tabla con los resultados finales
+resultados <- data.frame(
+  Estimador = c("Propuesto ((n-1)/S_n)", "MLE (n/S_n = 1/mean(X))"),
+  Sesgo     = c(round(bias_prop, 4), round(bias_MLE, 4)),
+  Varianza  = c(round(var_prop, 6), round(var_MLE, 6)),
+  ECM       = c(round(mse_prop, 6), round(mse_MLE, 6))
+)
+
+# Mostrar la tabla de resultados
+print(resultados)
+
+# Cargar librerías para gráficos
+library(ggplot2)
+library(reshape2)
+
+# Crear un data frame con los estimadores para los gráficos
+df <- data.frame(`(n-1)/S_n` = lambda_hat_prop, `n/S_n` = lambda_hat_MLE)
+df_melt <- melt(df, variable.name = "Estimador", value.name = "Valor")
+
+# Histograma superpuesto de los estimadores
+p1 <- ggplot(df_melt, aes(x = Valor, fill = Estimador)) +
+  geom_histogram(alpha = 0.5, bins = 50, position = "identity") +
+  geom_vline(xintercept = lambda_true, linetype = "dashed", color = "black", size = 1) +
+  labs(title = "Distribución de los Estimadores de λ",
+       x = "Valor Estimado de λ", y = "Frecuencia") +
+  theme_minimal()
+
+# Boxplot comparativo de los estimadores
+p2 <- ggplot(df_melt, aes(x = Estimador, y = Valor, fill = Estimador)) +
+  geom_boxplot(alpha = 0.7) +
+  geom_hline(yintercept = lambda_true, linetype = "dashed", color = "black", size = 1) +
+  labs(title = "Boxplot de los Estimadores de λ",
+       x = "Estimador", y = "Valor Estimado de λ") +
+  theme_minimal()
+
+# Mostrar los gráficos
+print(p1)
+print(p2)
+
+# -------------------------------
+## Conclusiones
+# -------------------------------
+# *   Tanto en el soporte matemático como el programa en R podemos observar que el estimador $\hat{\lambda}= \frac{n-1}{S_n}$ es **insesgado**.
+# *   El ECM calculado es $ECM(\hat{\lambda}) = \frac{\lambda²}{n-2}$.
+# *   Los estimadores calculados de momentos y máxima verosimilitud coinciden ya que $\hat{\lambda}=\frac{1}{\overline{X}}=\frac{n}{S_n}$, con lo cual podemos definir que no importa cual usamos vamos a obtener la misma estimación, en términos generales podemos decir que aplicar el método de momentos es mas fácil de aplicar en situaciones que necesiten rapidez y facilidad, mientras, aplicar el método de máxima verosimilitud cuando se necesite un resultado mas robusto.
 
 
 
