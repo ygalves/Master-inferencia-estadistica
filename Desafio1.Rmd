@@ -605,8 +605,64 @@ $$f_z(z) = \frac{z^{n-1}e^{-z}}{(n-1)!},\;z \geq 0$$
 *   Se necesita calcular el estimador de momentos y el estimador de máxima verosimilitud para el ejercicio.
 *   El ejercicio indica que cada $X_i$ tiene una densidad $f(x) = \lambda e^{\lambda x},(x \geq 0),$ y dado que el estimador propuesto $\hat{\lambda}=\frac{n-1}{S_n}$ y ya que el objetivo es estimar los tiempos muertos entre las llamadas al call center, podemos deducir que en este ejercicio los datos a evaluar se distinguen como una **Distribución exponencial^[https://mundoteca.org/distribuciones-exponenciales-y-sus-caracteristicas/]**
 *   Para este análisis de este ejercicio vamos a utilizar las propiedades de la esperanza porque estamos iniciando desde que $S_n$ tiene una distribución Gamma y por eso es que $$E\left(\frac{1}{S_n}\right)=\frac{\lambda}{n-1},$$
+Cuando despejemos esperamos demostrar que: $$E\left(\frac{n-1}{S_n}\right)=\lambda.$$
+*   Al despejar usando la esperanza podremos comprobar que el estimador $\hat{\lambda}=\frac{n-1}{S_n}$ es insesgado y que permite derivar la varianza y el ECM usando las propiedades de la **distribucion Gamma**
 
- 
+### **Propiedades de la distribucion Gamma $(\Gamma)$^[https://es.wikipedia.org/wiki/Distribuci%C3%B3n_gamma]**
+
+Las propiedades que voy a colocar acá permiten de forma general utilizar la distribución Gamma en diferentes aplicaciones, por ejemplo en el modelo de este ejercicio sobre tiempos de atención, análisis de superviciencia y en la suma de tiempos entre eventos en procesos $Poisson$.
+La relación $E\left[\frac{1}{S_n}\right]\,=\,\frac{\lambda}{(n-1)}$ que es muy usado en los problemas de estimación se fundamenta en las propiedades de Gamma y en especial en el cálculo de momentos de la distribucion Gamma:
+
+1.  **Función de Densidad de Probabilidad ó PDF**
+    Si $X$ sigue una distribucion gamma con parámertrós forma $\alpha$ y tasa $\beta$ (a veces se usa la escala $\theta=\frac{1}{\beta}$ y se escribe: $$f(x,\alpha,\beta)=\frac{\beta^{\alpha}}{\Gamma(\alpha)}x^{\alpha-1}e^{-\beta x},\;x>0,$$
+    Donde $\Gamma(\alpha)$ es la función Gamma definida por: $$\Gamma(\alpha)=\int_{0}^{\infty} t^{\alpha-1} e^{-t}\, dt$$
+2.  **Función de Distribución acumulada ó CDF**
+    la CDF se expresa en términos de la funcion de Gamma incompleta:$$F(x;\alpha,\beta)=\frac{1}{\Gamma(\alpha)}\gamma(\alpha,\beta x),$$
+    dónde $\gamma(\alpha,\beta x)$ es la Gamma incompleta inferior.
+3.    **Cálculo de Momentos**
+    a.   La esperanza de X es: $$E\left[X\right]=\frac{\alpha}{\beta}.$$
+    b.   La varianza es: $$Var(X) = \frac{\alpha}{\beta²}.$$
+    c.   Momento inverso ó expectativa del inverso, esperanza inversa ó propiedad clásica, esta es el resultado derivado de la propiedad de los momentos y es la expecatativa del inverso de una variable Gamma, si $S\sim\Gamma(\alpha,\beta)\;y\;\alpha>1,$ se tiene que $$E\left(\frac{1}{S}\right)=\frac{\beta}{\alpha-1}.$$
+4.    **Función Generadora de Momentos o MGF**
+    La función generadora de momentos de $X$ está dad por: $$M_x(t)=\left(1-\frac{t}{\beta}\right)^{-\alpha},\; para \;t<\beta.$$
+5. **Suma de Variables Gamma**
+Una propiedad muy útil es la suma de variables Gamma independientes, estas omparten el mismo parámetro de tasa de $\beta$, también tiene una distribución Gamma, así: $$X_1\sim\,\Gamma(\alpha_1,\beta)\quad y \quad X_2 \sim \, Gamma(\alpha_2,\beta),$$
+    entonces, pues tenemos que:$$X_1+X_2\,\sim\,\Gamma(\alpha_1+\alpha_2,\beta).$$
+6.    **Relación con Otras Distribuciones**
+    *   **Distribución Exponencial:**
+        Si $\alpha=1,$ la distribución Gamma se reduce a la distribución exponencial con parámetro $\beta$.
+    *   La distribución $X²$ con $\nu$ grados de libertad es un caso especial de la Gamma porque: $$\chi_{\nu}^{2}\,\sim\,\Gamma\left(\frac{\nu}{2},\frac{1}{2}\right).$$
+7.    **Propiedad de Escalamiento**
+  Si $X\,\Gamma(\alpha,\beta)\;y\;c>0,$ entonces la variable escalada $cX$ tiene distribución: $$cX\,\nu\,\Gamma\left(\alpha,\frac{\beta}{c}\right).$$
+    
+## Solución
+1. **Para calcular el sesgo del estimador** $\hat{\lambda}=\frac{n-1}{S_n}$
+
+Ya que la propiedad de el momento inverso (ver punto 3.c de las propiedades Gamma): $S\sim\Gamma(\alpha,\beta)\;y\;\alpha>1,$ y asumimos que $\alpha = n\;y\; \beta=\lambda)$, deducimos:
+
+Bueno conociendo que para $S_n\,\sim\,\Gamma(n,\lambda)$, tenemos que la propiedad es:$$E(\frac{1}{S_n})=\frac{\lambda}{n-1}$$, asi que el valor esperado de el estimador es: $$E(\hat{\lambda})=E\left(\frac{n-1}{S_n}\right)=(n-1)E\left(\frac{1}{S_n}\right)=(n-1)\left(\frac{\lambda}{n-1}\right)=\lambda.$$
+
+Por tanto, como $E(\hat{\lambda}) =\lambda$ podemos decir que el estimador $\hat{\lambda}$  es **insesgado**, porque el sesgo es la diferencia entre el valor esperado del estiamdor y el parámetro verdadero o sea: $$Sesgo=E(\hat{\lambda})-\lambda=0$$ y como el sesgo en este caso es 0, entonces se puede decir que no existe ó es insesgado.
+
+2. **Eror cuadrático medio ó ECM**
+Teniendo en cuenta que el $\hat{\lambda}$  es **insesgado**, entonces esperamos que $ECM = varianza$ y para obtener $Var(\hat{\lambda})$ tenemos que hallar la varianza de $\frac{1}{S_n}$ y sabemos que para $S_n\sim\Gamma(n,\lambda)\;\,n>2$ y usamos 2 para exista una varianza, entonces:$$*\qquad E\left(\frac{1}{S_n}\right)=\frac{\lambda}{n-1'}$$ $$*\qquad E\left(\frac{1}{S_{n}^{2}}\right)=\frac{\lambda²}{(n-1)(n-2)}$$ Ahora :
+$$Var\left(\frac{1}{S_n}\right)=E\left(\frac{1}{S_{n}^{2}}\right)-\left[E\left(\frac{1}{S_n}\right)\right]²=\frac{\lambda²}{(n-1)(n-2)}-\left(\frac{\lambda}{n-1}\right)²$$
+$$Var\left(\frac{1}{S_n}\right)=\frac{\lambda²}{(n-1)²}\left(\frac{n-1}{n-2}-1\right)=\frac{\lambda²}{(n-1)²}\left(\frac{(n-1)-(n-2)}{n-2}\right)=\frac{\lambda²}{(n-1)²(n-2)}.$$
+Ahora como $\hat{\lambda}=(n-1)(\frac{1}{S_n})$, entonces tenemos:
+
+$$Var(\hat{\lambda}) = (n-1)²Var\left(\frac{1}{S_n}\right)=(n-1)².\frac{\lambda²}{(n-1)²(n-2)}=\frac{\lambda²}{n-2}$$
+Entonces como ya sabemos que ECM = Var tenemos que: $$ECM(\lambda²)=\frac{\lambda²}{n-2}$$
+
+3. **Estimador por el Momento y máxima verosimilitud**
+Ahora como el ejercicio es una distribución exponencial y $X\sim Exp(\lambda)$, tenemos que: $E\left[X\right]= \frac{1}{\lambda}$
+*   Y usando el metodo de momentos igualamos el primer momento teórico com el momengto muestral:
+  $$\overline{X} = \frac{1}{\lambda} \rightarrow \hat{\lambda}_{MM}=\frac{1}{\overline{X}}$$
+* Aplicando la función de verosimilitud ó MLE para la muestra de $\left\{ x_1, \dots, x_n \right\}$ es:
+$$L(\lambda)=\prod_{i=1}^{n} \lambda e^{-\lambda x_i} = \lambda^n \exp\left(-\lambda \sum_{i=1}^{n} x_i\right)$$
+Y conociendo que el **logaritmo de la verosimilitud^[https://halweb.uc3m.es/esp/Personal/personas/aarribas/esp/docs/estI_tema3.pdf]** es: $$\ell(\lambda) = n \ln \lambda - \lambda \sum_{i=1}^{n} x_i$$
+Ahora tomamos el logaritmo de la verosimilitud y lo derivamos respetco a $\lambda$ e igualando a cero:
+$$\frac{d\ell}{d\lambda} = \frac{n}{\lambda} - \sum_{i=1}^{n} x_i = 0 \implies \hat{\lambda}_{MLE} = \frac{n}{\sum_{i=1}^{n} x_i} = \frac{1}{ \bar{X}}$$
+
 ```{r}
 # Configuración inicial
 set.seed(123)           # Para reproducibilidad
@@ -640,21 +696,22 @@ bias_MLE <- mean(lambda_hat_MLE) - lambda_true
 var_MLE  <- var(lambda_hat_MLE)
 mse_MLE  <- mean((lambda_hat_MLE - lambda_true)^2)
 
-cat("Resultados:\n")
-cat("Estimador propuesto ((n-1)/S_n):\n")
-cat("  Sesgo =", bias_prop, "\n")
-cat("  Varianza =", var_prop, "\n")
-cat("  ECM =", mse_prop, "\n\n")
-cat("Estimador MLE (n/S_n = 1/mean(X)):\n")
-cat("  Sesgo =", bias_MLE, "\n")
-cat("  Varianza =", var_MLE, "\n")
-cat("  ECM =", mse_MLE, "\n")
+# Crear una tabla con los resultados finales
+resultados <- data.frame(
+  Estimador = c("Propuesto ((n-1)/S_n)", "MLE (n/S_n = 1/mean(X))"),
+  Sesgo     = c(round(bias_prop, 4), round(bias_MLE, 4)),
+  Varianza  = c(round(var_prop, 6), round(var_MLE, 6)),
+  ECM       = c(round(mse_prop, 6), round(mse_MLE, 6))
+)
+
+# Mostrar la tabla de resultados
+print(resultados)
 
 # Cargar librerías para gráficos
 library(ggplot2)
 library(reshape2)
 
-# Crear un data frame con los estimadores
+# Crear un data frame con los estimadores para los gráficos
 df <- data.frame(`(n-1)/S_n` = lambda_hat_prop, `n/S_n` = lambda_hat_MLE)
 df_melt <- melt(df, variable.name = "Estimador", value.name = "Valor")
 
@@ -677,8 +734,12 @@ p2 <- ggplot(df_melt, aes(x = Estimador, y = Valor, fill = Estimador)) +
 # Mostrar los gráficos
 print(p1)
 print(p2)
-```
 
+```
+## Conclusiones:
+*   Tanto en el soporte matemático como el programa en R podemos observar que el estimador $\hat{\lambda}= \frac{n-1}{S_n}$ es **insesgado**.
+*   El ECM calculado es $ECM(\hat{\lambda}) = \frac{\lambda²}{n-2}$.
+*   Los estimadores calculados de momentos y máxima verosimilitud coinciden ya que $\hat{\lambda}=\frac{1}{\overline{X}}=\frac{n}{S_n}$, con lo cual podemos definir que no importa cual usamos vamos a obtener la misma estimación, en términos generales podemos decir que aplicar el método de momentos es mas fácil de aplicar en situaciones que necesiten rapidez y facilidad, mientras, aplicar el método de máxima verosimilitud cuando se necesite un resultado mas robusto.
 
 # ------------------------------
 # NOTAS
