@@ -53,7 +53,11 @@ conflict_prefer("lag", "dplyr")
 conflict_prefer("lift", "purrr")
 
 # Para hacer isntalacion de varios paquetes creamos un vector que contenga los nombre de los paquetes que queremos instalar
+<<<<<<< HEAD
 paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","tidyr","gridExtra")
+=======
+paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","tidyr")
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 
 # hacemos una Función que nos permite instalar paquetes si no están ya instalados en el sistema
 instalar_paquetes <- function(paquetes) {
@@ -88,6 +92,10 @@ library(tidyr)
 # -------------------------------
 # SITUACION 1
 # -------------------------------
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 # Estimacion de la proporcion de peces en el oceano pacífico
 ## Definimos los parámetros para hacer la simulacion
 set.seed(1234)
@@ -100,7 +108,11 @@ Escenarios <- list("Escenario 1" = list(n = 10, k = 5),
                    "Escenario 2" = list(n = 20, k = 9),
                    "Escenario 3" = list(n = 50, k = 20))
 
+<<<<<<< HEAD
 B <- 5000  # Número de simulaciones por escenario
+=======
+B <- 500  # Número de simulaciones por escenario
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 
 # --- Función para el Estimador Bayesiano ó Prior---
 # Calcula la media del posterior con prior uniforme en (0, 0.5)
@@ -186,7 +198,11 @@ for (esc in names(result)) {
 for (esc in names(Escenarios)) {
   k_vis <- Escenarios[[esc]]$k
   x_vals <- k_vis:(k_vis + 40)
+<<<<<<< HEAD
   # Redondeamos para asegurarnos de tener valores enteros en la función dnbinom
+=======
+  # dnbinom calcula la probabilidad para el número de fracasos, por ello se usa (x - k_vis)
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
   pmf_vals <- dnbinom(round(x_vals - k_vis), size = k_vis, prob = pi_verdadero)
   df_teorico <- data.frame(Total = x_vals, Probabilidad = pmf_vals)
   
@@ -197,11 +213,19 @@ for (esc in names(Escenarios)) {
   
   g <- ggplot(df_teorico, aes(x = Total, y = Probabilidad)) +
     geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+<<<<<<< HEAD
     geom_line(data = df_teorico, aes(x = Total, y = Probabilidad),
               color = "red", size = 1) +
     labs(title = paste("PMF Teórica - Escenario", esc, "(k =", k_vis, ", π =", pi_verdadero, ")"),
          x = "Número Total de Peces Capturados", y = "Probabilidad") +
     xlim(c(k_vis, k_vis + 40)) +
+=======
+    stat_function(fun = function(x) dnbinom(round(x - k_vis), linewidth = k_vis, prob = pi_verdadero),
+                  color = "red", linewidth = 1) +
+    labs(title = paste("PMF Teórica - Escenario", esc, "(k =", k_vis, ", π =", pi_verdadero, ")"),
+         x = "Número Total de Peces Capturados", y = "Probabilidad") +
+    xlim(k_vis, max(simulados)) +
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
     theme_minimal()
   
   print(g)
@@ -227,6 +251,7 @@ if(requireNamespace("knitr", quietly = TRUE)){
   print(ECM_tabla)
 }
 
+<<<<<<< HEAD
 # -------------------------------
 ## Conclusiones
 # -------------------------------
@@ -540,5 +565,7 @@ print(p2)
 # *   Los estimadores calculados de momentos y máxima verosimilitud coinciden ya que $\hat{\lambda}=\frac{1}{\overline{X}}=\frac{n}{S_n}$, con lo cual podemos definir que no importa cual usamos vamos a obtener la misma estimación, en términos generales podemos decir que aplicar el método de momentos es mas fácil de aplicar en situaciones que necesiten rapidez y facilidad, mientras, aplicar el método de máxima verosimilitud cuando se necesite un resultado mas robusto.
 
 
+=======
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 
 

@@ -1,18 +1,43 @@
+<<<<<<< HEAD
 # ------------------------------
+=======
+<<<<<<< HEAD
+# ------------------------------
+=======
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
+<p align="center">
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 
 <img src="https://www.uao.edu.co/wp-content/uploads/2024/12/uao-logo-2-04.webp" width="15%"/>
 
 <h2>UNIVERSIDAD AUTÓNOMA DE OCCIDENTE</strong></h2>
+<<<<<<< HEAD
+<h3>02/22/2025 CALI - COLOMBIA</strong></h3>
+# ------------------------------
+=======
 
 <h3>02/22/2025 CALI - COLOMBIA</strong></h3>
 # ------------------------------
 
+<<<<<<< HEAD
 <h3><strong>MAESTRIÍA EN INTELIGENCIA ARTIFICIAL Y CIENCIA DE DATOS</strong></h3>
+=======
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
+<h3><strong>MAESTRIA EN INTELIGENCIA ARTIFICIAL Y CIENCIA DE DATOS</strong></h3>
+
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 <h3><strong>INFERENCIA ESTADISTICA</strong></h3>
 
 <h3><strong>ENTREGA: </strong> DESAFÍO 1</h3>
-
+<<<<<<< HEAD
 # ------------------------------
+=======
+
+<<<<<<< HEAD
+# ------------------------------
+=======
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 <h4>
 
 <li><strong>Profesor:</strong> Cristian E García</li>
@@ -30,7 +55,89 @@
 <li><strong>Código:</strong> 22500214</li>
 
 </h4>
+<<<<<<< HEAD
+# ------------------------------
 
+
+```{r instalar_librerias}
+# Variable de control para habilitar o deshabilitar la eliminación de archivos, si tiene problemas para instalar un paqute puede que ayude borrar estos archivos , primero ejecuta este Chunk en FALSE, si hay problemas llevalo a TRUE y ejecuta este Chunk de nuevo. ES probable que tenga que instalar las siguientes dependencias uasndo los siguientes comandos en uan terminal: 
+# sudo apt-get update
+# sudo apt-get install libharfbuzz-dev libfribidi-dev libcurl4-openssl-dev libssl-dev libxml2-dev libfontconfig1-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
+
+eliminar_archivos_habilitado <- FALSE
+
+# Definir los archivos a eliminar
+archivos <- c(".Rhistory", ".RData", ".Rprofile")
+
+# Función para eliminar los archivos si existen
+eliminar_archivos <- function(archivos) {
+  for (archivo in archivos) {
+    if (file.exists(archivo)) {
+      file.remove(archivo)
+      cat("Archivo eliminado:", archivo, "\n")
+    } else {
+      cat("Archivo no encontrado:", archivo, "\n")
+    }
+  }
+}
+
+# Eliminar los archivos si se habilitó la opción
+if (eliminar_archivos_habilitado) {
+  eliminar_archivos(archivos)
+} else {
+  cat("La eliminación de archivos está deshabilitada.\n")
+}
+
+# Instalar y cargar el paquete para manejo de conflictos
+install.packages("conflicted")
+library(conflicted)
+
+# Preferir funciones específicas de paquetes que estan en conflicto en la librería tidyverse purrr y tidyr las cuales tienen funciones con nombres iguales "stats" y "caret". así que vamos adefinir cual de estas funciones vamos a preferir
+
+conflict_prefer("filter", "dplyr")
+conflict_prefer("lag", "dplyr")
+conflict_prefer("lift", "purrr")
+
+# Para hacer isntalacion de varios paquetes creamos un vector que contenga los nombre de los paquetes que queremos instalar
+paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","tidyr")
+
+# hacemos una Función que nos permite instalar paquetes si no están ya instalados en el sistema
+instalar_paquetes <- function(paquetes) {
+  paquetes_instalados <- paquetes[paquetes %in% installed.packages()[,"Package"]]
+  nuevos_paquetes <- paquetes[!(paquetes %in% installed.packages()[,"Package"])]
+  
+  if(length(nuevos_paquetes)) {
+    install.packages(nuevos_paquetes, quiet = TRUE)
+    cat("Se instalaron los siguientes paquetes:", nuevos_paquetes, "\n")
+  } else {
+    cat("Todos los paquetes ya están instalados.\n")
+  }
+  
+  if(length(paquetes_instalados)) {
+    cat("Los siguientes paquetes ya estaban instalados:", paquetes_instalados, "\n")
+  }
+}
+
+# Instala los paquetes que son necesarios
+instalar_paquetes(paquetes)
+
+
+# Cargar los paquetes
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(ModelMetrics)
+library(stats4)
+library(tidyverse)
+library(tidyr)
+
+```
+
+# ------------------------------
+# SITUACIÓN 1
+=======
+
+<<<<<<< HEAD
 # ------------------------------
 
 
@@ -110,12 +217,20 @@ library(tidyr)
 
 # ------------------------------
 # SITUACIÓN 1
+=======
+# Situación 1
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 
 Para estimar la proporción desconocida $π(0 < π ≤ 0,50)$ de una determinada especie de peces que habita en el océano Pacífico, se aplicará el siguiente plan de muestreo. Cada uno de $n( > 1)$ barcos pesqueros capturará peces hasta capturar exactamente $k( > 1)$ peces de la especie particular de interés, y se registrará el número total de peces capturados por cada barco pesquero. Todos los peces capturados se devolverán ilesos al océano Pacífico. Para resolver dicho problema se le pide investigar 4 formas diferentes de estimar dicha proporción y comparar el desempeño de los resultados.
 
 Plantee tres escenarios diferentes para llevar a cabo dichas estimaciones, compare para diferentes tamaños de muestra y concluya teniendo en cuenta las medidas de desempeño como el ECM
 
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 ## Entendiendo el Problema
 
 *   En el plan de muestreo se capturará peces de forma aleatoria, cada captura tiene sólo dos posibles resultados, el pez capturado puede ser o no de la especie de interés, por tanto se obseva que el muestreo tiene un comportamiento binomial, el éxito de cada captura tiene una probabilidad $\pi$ y el fracaso $(1−\pi)$. En estadística se llama a este tipo de muestreos como Ensayo de Bernoulli^[https://es.wikipedia.org/wiki/Ensayo_de_Bernoulli︎].
@@ -138,7 +253,11 @@ $$Esperanza=\mathbb{E}[X]=\frac{k}{\pi}$$
 
 $$Varianza=Var(X)=\frac{k(1−\pi)}{\pi²}$$
 
+<<<<<<< HEAD
 *   Es necesario definir el valor real de la proporción de  peces en el oceano de la especie buscada ($\pi$) y a este se le denominará como $\pi_{verdadero}$, ese valor que ya se conoce como correcto nos va ha permitir comparar los estimadores en la simulaciones ó en los diferentes escenarios propuestos y luego comparar los resultados con el valor real para saber la precisión y consistencia de los diferentes estimadores.
+=======
+*   Es necesario definir el valor real de la proporción de  peces en el oceano de la especie buscada ($\pi$) y a este se le denominará como $\pi_{verdadero}$, ese valor que ya se conoce como correcto no va ha permitir comparar los estimadores en la simulaciones ó en los diferentes escenarios propuestos y luego comparar los resultados con el valor real para saber la precisión y consistencia de los diferentes estimadores.
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 
 *   Si no conocemos a $\pi_{verdadero}$ y es lo que realmente sucede en la vida real, para las simulaciones establecemos el valor a un estimado para poder realizar los análisis necesarios a los estimadores o en su defecto se evaluan los estimadores usando tecnicas diferentes a ECM tal como usar la varianza, usar los intervalos de confianza, estudios de remuestreo, etc.
 
@@ -182,7 +301,11 @@ Escenarios <- list("Escenario 1" = list(n = 10, k = 5),
                    "Escenario 2" = list(n = 20, k = 9),
                    "Escenario 3" = list(n = 50, k = 20))
 
+<<<<<<< HEAD
 B <- 5000  # Número de simulaciones por escenario
+=======
+B <- 500  # Número de simulaciones por escenario
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
 
 # --- Función para el Estimador Bayesiano ó Prior---
 # Calcula la media del posterior con prior uniforme en (0, 0.5)
@@ -268,7 +391,11 @@ for (esc in names(result)) {
 for (esc in names(Escenarios)) {
   k_vis <- Escenarios[[esc]]$k
   x_vals <- k_vis:(k_vis + 40)
+<<<<<<< HEAD
   # Redondeamos para asegurarnos de tener valores enteros en la función dnbinom
+=======
+  # dnbinom calcula la probabilidad para el número de fracasos, por ello se usa (x - k_vis)
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
   pmf_vals <- dnbinom(round(x_vals - k_vis), size = k_vis, prob = pi_verdadero)
   df_teorico <- data.frame(Total = x_vals, Probabilidad = pmf_vals)
   
@@ -279,11 +406,19 @@ for (esc in names(Escenarios)) {
   
   g <- ggplot(df_teorico, aes(x = Total, y = Probabilidad)) +
     geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+<<<<<<< HEAD
     geom_line(data = df_teorico, aes(x = Total, y = Probabilidad),
               color = "red", size = 1) +
     labs(title = paste("PMF Teórica - Escenario", esc, "(k =", k_vis, ", π =", pi_verdadero, ")"),
          x = "Número Total de Peces Capturados", y = "Probabilidad") +
     xlim(c(k_vis, k_vis + 40)) +
+=======
+    stat_function(fun = function(x) dnbinom(round(x - k_vis), linewidth = k_vis, prob = pi_verdadero),
+                  color = "red", linewidth = 1) +
+    labs(title = paste("PMF Teórica - Escenario", esc, "(k =", k_vis, ", π =", pi_verdadero, ")"),
+         x = "Número Total de Peces Capturados", y = "Probabilidad") +
+    xlim(k_vis, max(simulados)) +
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
     theme_minimal()
   
   print(g)
@@ -309,12 +444,97 @@ if(requireNamespace("knitr", quietly = TRUE)){
   print(ECM_tabla)
 }
 
+<<<<<<< HEAD
+=======
 ```
 
 ## Conclusiones
 
 En el ejercicio propuse 4 etimadores: el de mediana muestral o momentos (MLE) y su version insesgada UMVUE o de varianza mínima, el de transformación Logaritmica y el Bayesiano.
 
+Se plantearon 3 escenarios diferentes y se realizáron las simulaciones respectivas.
+Obsevamos que segun el ECM:
+
+*   Los estimadores basados en la media muestral (MLE y UMVUE) son los de mejor desempeño.
+
+*   Los estimadores basados en la media muestral (MLE y UMVUE) se comportan de manera muy similar.
+
+*   Los estimadores basados en la media muestral (MLE y UMVUE) mejoran en consistencia a medida que las muesras $k$ aumentan.
+
+*   El estimador basado en transformación logarítmica mejora igual a medida que las muestras sonmas grandes pero mantiene un ECM superior y eso significa menor eficiencia.
+
+*   El estimador bayesiano no presenta resultados en todos los escenarios y puede signiicar que necesita mayor verificacion o una seleccion del pior nueva o que este estimador no es suficientemente robusto para este muestreo en particular.
+
+# ------------------------------
+# SITUACIÓN 2
+
+Suponga que se tiene una muestra aleatoria de tamaño $2n$ tomada de una población $X$, con $E(X) = \mu$ y $Var(X) = \sigma²$, Sean:
+
+$$\overline{X}_1 = \frac{1}{2n} \sum_{i=1}^{2n}x_i\quad \text{y}\quad \overline{X}_2 = \frac{1}{n} \sum_{i=1}^{n}x_i$$
+dos estimadores de $\mu$.
+
+*   ¿Cuál es le mejor estimador de $\mu$?
+
+*   Simule una situación con 1000 muestras de tal forma que se pueda evidenciar de manera gráfica cual de los dos estimados es mejor.
+
+```{r}
+
+```
+
+# ------------------------------
+# SITUACIÓN 3
+
+En una población hay un número $\theta$ de vehículos informales (llamados “piratas”), que es desconocido. Supongamos que los piratas, están numerados visiblemente en forma consecutiva: $1,2,3,...,\theta$. Con el propósito de estimar $\theta$ , usted registra una muestra aleatoria de $n$ piratas y anotando cada vez el número $X$ correspondiente. Así dispone de una muestra aleatoria: $X1, X2…, Xn$. Existen varias propuestas razonables de estimadores para el número total $\theta$ de taxis, como las que se describen a continuación y que surgen de la consideración de que la distribución de la variable aleatoria $X$ (número del carro), es uniforme discreta. Los estimadores propuestos son los siguientes:
+
+$$\hat{\theta}_{(1)} = 2\overline{X}_n-1$$
+$$\hat{\theta}_{(2)} = X_{(n)}+X_{(1)}-1$$
+$$\hat{\theta}_{(3)} = X_{max}+\overline{d}$$
+Donde $\overline{d}$ es la media de los saltos consecutivos de los números de la muestra al ser ordenados en forma creciente. (Desarrolle $\overline{d}$ y se simplificará la expresión)
+
+$$\hat{\theta}_{(4)} = 2Me(X)-1$$
+$$\hat{\theta}_{(5)} = \overline{X}+3S$$
+Simule el comportamiento de cada uno de estos estimadores, $R$ o cualquier otra opción tecnológica, variando el valor del parámetro y el tamaño de muestra $n$ . Nos interesa compararlos especialmente en cuanto al Sesgo, la Varianza de los estimadores y también el Error Cuadrático Medio (ECM) y cualquier otro indicador que le parezca razonable.
+
+```{r}
+
+```
+
+# ------------------------------
+# SITUACIÓN 4
+
+Tiempos de atención entre llamadas de reclamaciones por seguros.
+
+Sean $(X_1, \dots, X_n)$ con densidad $\lambda e^{\lambda x},(x \geq 0),(n \leq2)$. Sea $S_n=\sum_{i=1}^{n} X_i)$. Es bien conocido que $Z = \lambda S_n$ tiene densidad:
+$$f_z(z) = \frac{z^{n-1}e^{-z}}{(n-1)!},\;z \geq 0$$
+*   Utilice esto para calcular el sesgo y el ECM de $\hat{\lambda}=\frac{n-1}{S_n}$.
+
+*   Calcule el estimados de momentos y máximo verosímil para la función de densidad.
+
+```{r}
+
+```
+
+
+# ------------------------------
+# NOTAS
+
+## Reglas básicas de Logaritmos:
+*   Producto: $log(ab) = log(a) + log(b)$
+*   Cociente: $log(\frac{a}{b}) = log(a) - log(b)$
+*   Potencia: $log(a^r) = {r}{log(a)}$
+*   Logaritmo de 1: $log(1) = 0$
+*   Cambio de base: $log_b(a)=\frac{log_c(a)}{log_c(b)^,}$
+=======
+```{r}
+plot(cars)
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
+```
+
+## Conclusiones
+
+En el ejercicio propuse 4 etimadores: el de mediana muestral o momentos (MLE) y su version insesgada UMVUE o de varianza mínima, el de transformación Logaritmica y el Bayesiano.
+
+<<<<<<< HEAD
 Se plantearon 3 escenarios diferentes y se realizáron las simulaciones respectivas.
 Obsevamos que segun el ECM:
 
@@ -757,3 +977,7 @@ print(p2)
 
 
 =======
+=======
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+>>>>>>> c8e66f8b57ca15e418b50f6000c957f6b73fc8c6
+>>>>>>> 4e4df42893b27c523db9ea5e946ba51057b8eb72
