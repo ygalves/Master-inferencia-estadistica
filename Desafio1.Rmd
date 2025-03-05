@@ -1,4 +1,9 @@
+---
+title: "Desafio1"
+---
+
 <img src="https://www.uao.edu.co/wp-content/uploads/2024/12/uao-logo-2-04.webp" width="15%"/>
+
 # ------------------------------
 <h2>UNIVERSIDAD AUTÓNOMA DE OCCIDENTE</strong></h2>
 <h3>02/22/2025 CALI - COLOMBIA</strong></h3>
@@ -93,10 +98,8 @@ library(tidyverse)
 library(tidyr)
 
 ```
-
 # ------------------------------
 # SITUACIÓN 1
-
 
 Para estimar la proporción desconocida $π(0 < π ≤ 0,50)$ de una determinada especie de peces que habita en el océano Pacífico, se aplicará el siguiente plan de muestreo. Cada uno de $n( > 1)$ barcos pesqueros capturará peces hasta capturar exactamente $k( > 1)$ peces de la especie particular de interés, y se registrará el número total de peces capturados por cada barco pesquero. Todos los peces capturados se devolverán ilesos al océano Pacífico. Para resolver dicho problema se le pide investigar 4 formas diferentes de estimar dicha proporción y comparar el desempeño de los resultados.
 
@@ -581,7 +584,6 @@ grid.arrange(p_bias, p_variance, p_ecm, ncol = 1)
   *   El estimador $\theta_2$ tiene igualmente un ECM bajo $(562.28)$, tiene tambien bajo sesgo $(0.23)$ y una varianza moderada $(562.23)$ pero el ECM es mayor que el ECM de $\theta_3$ con $(307.45)$, con lo cual concluimos que $\theta_2$ es un buen indicador.
 
 La mejor estimación de $\theta$ se logra usando el estimador $\hat{\theta_3} = X_{max} + \frac{X_{max} -X_{min}}{n-1}$, esto a que este presenta la mejor precision global $(307.49)$ manteniendo un sesgo cercano a cero $(1.08)$ y la varianza mas baja $(306.33)$, ahora bien este desafio necesita estimar un valor desconocido de $\theta$ por tanto una baja varianza nos ayuda a estimar un valor que sea mas cercano al valor real de $\theta$.
-
 
 # ------------------------------
 # SITUACIÓN 4
