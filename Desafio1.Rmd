@@ -16,7 +16,7 @@ title: "Desafio1"
 <li><strong>Profesor:</strong> Cristian E García</li>
 <li><strong>Alumno:</strong> Yoniliman Galvis Aguirre</li>
 <li><strong>Código:</strong> 22500214</li>
-
+<li><strong>Repositorio:</strong> https://github.com/ygalves/Master-inferencia-estadistica.git</li>
 </h4>
 
 # ------------------------------

@@ -6,6 +6,7 @@
 ## Profesor: Cristian E García.
 ## Alumno: Yoniliman Galvis Aguirre
 ## Codigo: 22500214
+## Repositorio: https://github.com/ygalves/Master-inferencia-estadistica.git
 ## CALI - COLOMBIA
 ### 02/24/2025
 # -------------------------------
