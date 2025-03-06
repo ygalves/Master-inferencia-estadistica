@@ -65,7 +65,7 @@ conflict_prefer("lag", "dplyr")
 conflict_prefer("lift", "purrr")
 
 # Para hacer isntalacion de varios paquetes creamos un vector que contenga los nombre de los paquetes que queremos instalar
-paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","tidyr","gridExtra")
+paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","rlang","tidyr","gridExtra","progress","stats4","knitr")
 
 # hacemos una Función que nos permite instalar paquetes si no están ya instalados en el sistema
 instalar_paquetes <- function(paquetes) {
@@ -87,7 +87,6 @@ instalar_paquetes <- function(paquetes) {
 # Instala los paquetes que son necesarios
 instalar_paquetes(paquetes)
 
-
 # Cargar los paquetes
 library(dplyr)
 library(ggplot2)
@@ -95,16 +94,22 @@ library(caret)
 library(ModelMetrics)
 library(stats4)
 library(tidyverse)
+library(rlang)
+library(progress)
+### grid Extra esta deshabilitada ya que causa problemas con pivot_longer
+### library(gridExtra)
 library(tidyr)
-
+library(stats4)
+library(knitr)
 ```
+
+
 # ------------------------------
 # SITUACIÓN 1
 
 Para estimar la proporción desconocida $π(0 < π ≤ 0,50)$ de una determinada especie de peces que habita en el océano Pacífico, se aplicará el siguiente plan de muestreo. Cada uno de $n( > 1)$ barcos pesqueros capturará peces hasta capturar exactamente $k( > 1)$ peces de la especie particular de interés, y se registrará el número total de peces capturados por cada barco pesquero. Todos los peces capturados se devolverán ilesos al océano Pacífico. Para resolver dicho problema se le pide investigar 4 formas diferentes de estimar dicha proporción y comparar el desempeño de los resultados.
 
 Plantee tres escenarios diferentes para llevar a cabo dichas estimaciones, compare para diferentes tamaños de muestra y concluya teniendo en cuenta las medidas de desempeño como el ECM
-
 
 ## Entendiendo el Problema
 
@@ -161,144 +166,187 @@ $\hat{\pi}_{log} = exp\left\{
 4.    Estimador insesgado de varianza mínima - (Uniformly Minimum-Variance Unbiased Estimator):
 $\hat{\pi}_{UMVUE} = \frac{nk-1}{\sum_{i = 1}^{n} X_i-1}$
 
+```{r}
+###############################################################################
+# Clase: Estimadores y Distribuciones Muestrales para la estimación de π
+###############################################################################
 
-```{r Solucion}
-# Estimacion de la proporcion de peces en el oceano pacífico
-## Definimos los parámetros para hacer la simulacion
+### 1. SIMULACIÓN DEL PROCESO DE CAPTURA DE PECES
+# Cada barco captura peces hasta lograr k éxitos (peces de la especie de interés).
+# El total de peces capturados sigue una distribución negativa binomial:
+# total = k (éxitos) + número de fracasos.
+# vamos a simular la distribución de los peces capturados por un barco
+
+pi_verdadero <- 0.3     # Valor real de π (0 < π ≤ 0.5)
 set.seed(1234)
 
-# pi_verdadero es el valor real del parámetro que queremos estimar, en este caso es la proporcion de la especie de peces en el oceano pacífico $\pi$, contra este valor es que vamos a comparar los estimadores en la simulación, sin este valor no podriamos hacer la validacion del ECM ó del sesgo de la simulación. Si no se conoce el valor pi_verdadero, no es posible usar ECM y tocaría evaluar el rendimiento con otras métricas como varianza, intervalos de confianza o por estudios previos de muestreo.
-pi_verdadero <- 0.3  # Valor verdadero de π (0 < π ≤ 0.5)
+# Para ver el comportamiento , usamos un primer escenario con k = 5 capturas requeridas.
+k <- 5  # Número de éxitos requeridos por barco
 
-# Definimos los 3 escenarios: n = número de barcos, k = número de capturas requeridas
-Escenarios <- list("Escenario 1" = list(n = 10, k = 5),
-                   "Escenario 2" = list(n = 20, k = 9),
-                   "Escenario 3" = list(n = 50, k = 20))
+# Definirmos el rango de totales (mínimo: k, máximo: k+40)
+total_capturas <- k:(k + 40)
 
-B <- 5000  # Número de simulaciones por escenario
+# Calculamos la PMF teórica:
+# dnbinom(x, size = k, prob = pi_verdadero) calcula la probabilidad de x fracasos.
+pmf_teorica <- dnbinom(total_capturas - k, size = k, prob = pi_verdadero)
 
-# --- Función para el Estimador Bayesiano ó Prior---
-# Calcula la media del posterior con prior uniforme en (0, 0.5)
-media <- function(sum_x, n, k) {
-  post_density <- function(pi) {
-    2 * pi^(n * k) * (1 - pi)^(sum_x - n * k)
-  }
+# Graficamos la PMF teórica para este escenario
+plot(total_capturas, pmf_teorica, type = "h", lwd = 2, col = "blue",
+     main = paste("PMF Teórica (k =", k, ", π =", pi_verdadero, ")"),
+     xlab = "Número total de peces capturados", ylab = "Probabilidad")
+points(total_capturas, pmf_teorica, pch = 19, col = "red")
+
+
+###############################################################################
+# 2. ESTIMACIÓN DE π POR MÁXIMA VEROSIMILITUD (MLE) CON stats4
+###############################################################################
+
+# Simulamos los datos para un escenario concreto: 
+# n barcos capturan peces hasta lograr k éxitos.
+n <- 20  # Número de barcos
+datos <- rnbinom(n, size = k, prob = pi_verdadero) + k
+
+# Función de log-verosimilitud (ignorando constantes):
+# log L(π) = n*k*log(π) + (sum(datos) - n*k)*log(1-π)
+
+negLogLik <- function(pi) {
+  - ( n * k * log(pi) + (sum(datos) - n * k) * log(1 - pi) )
+}
+
+# Valor inicial: π0 = k/mean(datos)
+pi_inicial <- k / mean(datos)
+
+# Estimación por MLE imponiendo límites (0, 0.5]
+resultado_mle <- mle(negLogLik, start = list(pi = pi_inicial),
+                     method = "L-BFGS-B", lower = 0.0001, upper = 0.5)
+summary(resultado_mle)
+
+############################################
+#   1. Función de Verosimilitud (Ejemplo)    #
+############################################
+
+# Para una única observación (un barco)
+k <- 5                  # Número de capturas requeridas
+x_obs <- 8              # Total de peces capturados (incluye k éxitos)
+p <- seq(0, 0.5, length.out = 1000)  # π varía entre 0 y 0.5
+# La verosimilitud (sin incluir el coeficiente combinatorio)
+verosimilitud <- p^k * (1 - p)^(x_obs - k)
+plot(p, verosimilitud, type = "l", lwd = 2, col = "blue",
+     main = "Función de Verosimilitud para un barco",
+     xlab = expression(pi), ylab = "Verosimilitud")
+pi_est <- p[which.max(verosimilitud)]
+points(pi_est, max(verosimilitud), col = "red", pch = 19)
+cat("Estimación MLE (gráfica) para un barco:", pi_est, "\n\n")
+
+###############################################################################
+# 3. COMPARACIÓN DE ESTIMADORES MEDIANTE USO DE ESCENARIOS DE SIMULACIÓN
+###############################################################################
+
+# Se consideran 4 estimadores para π:
+# T_MLE:       π̂ = k / media de capturas
+# T_Log:       Estimador basado en transformación logarítmica
+# T_Bayes:     Estimador Bayesiano (media del posterior con prior uniforme en (0,0.5))
+# T_UMVUE:     Estimador insesgado (UMVUE)
+
+# Definir las funciones estimadoras:
+T_MLE <- function(x, k) {
+  k / mean(x)
+}
+
+T_Log <- function(x, k) {
+  exp(mean(log(k / x)))
+}
+
+# Calculo de la media del posterior para un prior uniforme en (0,0.5)
+media_posterior <- function(sum_x, n, k) {
+  post_density <- function(pi) { 2 * pi^(n * k) * (1 - pi)^(sum_x - n * k) }
   norm_const <- integrate(post_density, lower = 0, upper = 0.5)$value
-  num_int <- integrate(function(pi) pi * post_density(pi),
-                         lower = 0, upper = 0.5)$value
-  return(num_int / norm_const)
+  num_int <- integrate(function(pi) pi * post_density(pi), lower = 0, upper = 0.5)$value
+  num_int / norm_const
 }
 
-# --- Definición de los Estimadores Propuestos ---
-
-# 1. Estimador MLE (o basado en la media muestral)
-estimador_mle <- function(data, k) { 
-  k / mean(data) 
+T_Bayes <- function(x, k) {
+  media_posterior(sum(x), length(x), k)
 }
 
-# 2. Estimador basado en transformación logarítmica
-# Evitamos usar el nombre "log" para no colisionar con la función base.
-estimador_log <- function(data, k) { 
-  exp(mean(log(k / data))) 
+T_UMVUE <- function(x, k) {
+  (length(x) * k - 1) / (sum(x) - 1)
 }
 
-# 3. Estimador Bayesiano
-estimador_bayes <- function(data, k) { 
-  media(sum(data), length(data), k) 
-}
+# Crear los tres escenarios con diferentes valores de n (barcos) y k (capturas requeridas):
+escenarios <- list(
+  "Escenario 1" = list(n = 15, k = 10),
+  "Escenario 2" = list(n = 30, k = 17),
+  "Escenario 3" = list(n = 75, k = 30)
+)
 
-# 4. Estimador UMVUE (insesgado)
-estimador_umvue <- function(data, k) {
-  (length(data) * k - 1) / (sum(data) - 1)
-}
+B <- 5000  # Número de simulaciones que usaremos para evaluar el ECM
+resultados_ECM <- list()   # Lo usaremos Para guardar el ECM de cada estimador en cada escenario
 
-# --- Simulaciones y Comparaciones ---
-result <- list()           # Para almacenar el ECM de cada estimador por escenario
-estimates_all <- data.frame()  # Para recolectar los valores estimados y graficarlos
+# Data frame para guardar todas las estimaciones individuales y usarlas en graficas o tablas finales
+estimaciones_total <- data.frame()
 
-for (esc in names(Escenarios)) {
-  n <- Escenarios[[esc]]$n
-  k <- Escenarios[[esc]]$k
+# Loop para la simulacion de los escenarios
+for (esc in names(escenarios)) {
+  n <- escenarios[[esc]]$n
+  k <- escenarios[[esc]]$k
   
-  # Matriz para almacenar los valores de cada estimador en cada simulación
-  est <- matrix(NA, nrow = B, ncol = 4)
-  colnames(est) <- c("MLE", "Logaritmo", "Bayes", "UMVUE")
+  # Guardamos las estimaciones de cada simulación
+  simulaciones <- matrix(NA, nrow = B, ncol = 4)
+  colnames(simulaciones) <- c("MLE", "Logaritmo", "Bayes", "UMVUE")
   
   for (i in 1:B) {
-    # Generar datos para n barcos:
-    # rnbinom(n, size = k, prob = pi_verdadero) genera el número de fracasos hasta k éxitos.
-    # Sumamos k para obtener el total de capturas.
-    data <- rnbinom(n, size = k, prob = pi_verdadero) + k
-    
-    # Calcular cada uno de los estimadores:
-    est[i, "MLE"]       <- estimador_mle(data, k)
-    est[i, "Logaritmo"] <- estimador_log(data, k)
-    est[i, "Bayes"]     <- estimador_bayes(data, k)
-    est[i, "UMVUE"]     <- estimador_umvue(data, k)
+    # Ahora para cada barco simulamos el proceso: rnbinom(n, size=k, prob=π) y luego retornamos los fracasos,
+    # Y sumando k obtenemos el total de peces capturados.
+    datos_sim <- rnbinom(n, size = k, prob = pi_verdadero) + k
+    simulaciones[i, "MLE"]       <- T_MLE(datos_sim, k)
+    simulaciones[i, "Logaritmo"] <- T_Log(datos_sim, k)
+    simulaciones[i, "Bayes"]     <- T_Bayes(datos_sim, k)
+    simulaciones[i, "UMVUE"]     <- T_UMVUE(datos_sim, k)
   }
   
-  # Calcular el ECM para cada estimador en el escenario actual
-  ECM <- colMeans((est - pi_verdadero)^2)
-  result[[esc]] <- ECM
+  # Obtener el ECM para cada estimador en el escenario actual (i)
+  ECM <- colMeans((simulaciones - pi_verdadero)^2)
+  resultados_ECM[[esc]] <- ECM
+  cat("\n", esc, "\n")
+  print(ECM)
   
-  # Convertir a formato largo para graficar
-  df <- as.data.frame(est)  # Se usa "est" (no "estimaciones")
-  df$Simulacion <- 1:B
-  df_long <- pivot_longer(df, cols = c("MLE", "Logaritmo", "Bayes", "UMVUE"),
-                          names_to = "Estimador", values_to = "Valor")
-  df_long$Escenario <- esc
-  estimates_all <- rbind(estimates_all, df_long)
+  # Para la grafica final organizamos las simulaciones 
+  simulaciones_df <- as.data.frame(simulaciones)
+  simulaciones_df$Simulacion <- 1:B
+  simulaciones_df$Escenario <- esc
+  simulaciones_long <- pivot_longer(simulaciones_df, 
+                                    cols = c("MLE", "Logaritmo", "Bayes", "UMVUE"),
+                                    names_to = "Estimador", values_to = "Valor")
+  estimaciones_total <- rbind(estimaciones_total, simulaciones_long)
+  
+  # Graficamos la PMF teórica para el escenario (i)
+  totales <- k:(k + 40)
+  pmf_teorica <- dnbinom(totales - k, size = k, prob = pi_verdadero)
+  plot(totales, pmf_teorica, type = "h", lwd = 2, col = "blue",
+       main = paste("PMF Teórica -", esc, "(k =", k, ", π =", pi_verdadero, ")"),
+       xlab = "Número total de peces capturados", ylab = "Probabilidad")
+  points(totales, pmf_teorica, pch = 19, col = "red")
 }
 
-# Mostrar los resultados (ECM) para cada escenario
-for (esc in names(result)) {
-  cat("\nEscenario", esc, "\n")
-  print(result[[esc]])
-}
+###############################################################################
+# 4. TABLA RESUMEN DEL ECM (ERROR CUADRÁTICO MEDIO)
+###############################################################################
 
-# --- Graficar la PMF teórica de la distribución negativa binomial para cada escenario ---
-# Esto ilustra la distribución de capturas en un solo barco (para cada k del escenario)
-for (esc in names(Escenarios)) {
-  k_vis <- Escenarios[[esc]]$k
-  x_vals <- k_vis:(k_vis + 40)
-
-  # Redondeamos para asegurarnos de tener valores enteros en la función dnbinom
-
-  pmf_vals <- dnbinom(round(x_vals - k_vis), size = k_vis, prob = pi_verdadero)
-  df_teorico <- data.frame(Total = x_vals, Probabilidad = pmf_vals)
-  
-  set.seed(123)  # Para reproducibilidad
-  n_sim <- 10000
-  simulados <- rnbinom(n_sim, size = k_vis, prob = pi_verdadero) + k_vis
-  df_sim <- data.frame(Total = simulados)
-  
-  g <- ggplot(df_teorico, aes(x = Total, y = Probabilidad)) +
-    geom_bar(stat = "identity", fill = "skyblue", color = "black") +
-    geom_line(data = df_teorico, aes(x = Total, y = Probabilidad),
-              color = "red", linewidth = 1) +
-    labs(title = paste("PMF Teórica - Escenario", esc, "(k =", k_vis, ", π =", pi_verdadero, ")"),
-         x = "Número Total de Peces Capturados", y = "Probabilidad") +
-    xlim(c(k_vis, k_vis + 40)) +
-    theme_minimal()
-  print(g)
-}
-
-# Construir la tabla ECM utilizando sapply y verificando que cada estimador exista
 ECM_tabla <- data.frame(
-  Escenario   = names(result),
-  n           = sapply(names(result), function(x) Escenarios[[x]]$n),
-  k           = sapply(names(result), function(x) Escenarios[[x]]$k),
-  MLE         = sapply(result, function(x) { if("MLE" %in% names(x)) as.numeric(x["MLE"]) else NA }),
-  Logaritmo   = sapply(result, function(x) { if("Logaritmo" %in% names(x)) as.numeric(x["Logaritmo"]) else NA }),
-  Bayes       = sapply(result, function(x) { if("Bayes" %in% names(x)) as.numeric(x["Bayes"]) else NA }),
-  UMVUE       = sapply(result, function(x) { if("UMVUE" %in% names(x)) as.numeric(x["UMVUE"]) else NA }),
+  Escenario   = names(resultados_ECM),
+  n           = sapply(names(resultados_ECM), function(x) escenarios[[x]]$n),
+  k           = sapply(names(resultados_ECM), function(x) escenarios[[x]]$k),
+  MLE         = sapply(resultados_ECM, function(x) { if("MLE" %in% names(x)) as.numeric(x["MLE"]) else NA }),
+  Logaritmo   = sapply(resultados_ECM, function(x) { if("Logaritmo" %in% names(x)) as.numeric(x["Logaritmo"]) else NA }),
+  Bayes       = sapply(resultados_ECM, function(x) { if("Bayes" %in% names(x)) as.numeric(x["Bayes"]) else NA }),
+  UMVUE       = sapply(resultados_ECM, function(x) { if("UMVUE" %in% names(x)) as.numeric(x["UMVUE"]) else NA }),
   stringsAsFactors = FALSE
 )
 
-
-# Resumen de EMC de el desempeño de los estimadores en cada escenario planteado
 if(requireNamespace("knitr", quietly = TRUE)){
-  knitr::kable(ECM_tabla, caption = "ECM de cada estimador por escenario, donde n = número de barcos, k = número de capturas requeridas")
+  knitr::kable(ECM_tabla, 
+               caption = "ECM de cada estimador por escenario (n es el núm. de barcos y k es el núm. de capturas requeridas).")
 } else {
   print(ECM_tabla)
 }
@@ -322,6 +370,7 @@ Obsevamos que segun el ECM:
 
 *   El estimador bayesiano no presenta resultados en todos los escenarios y puede signiicar que necesita mayor verificacion o una seleccion del pior nueva o que este estimador no es suficientemente robusto para este muestreo en particular.
 
+*   La verosimilitud teórica produce un estimador $\hat{\pi}$ y es equivalente al MCE del estimador MLE ya que $MLE=\frac{k}{\overline{x}} = \hat{\pi}$
 
 # ------------------------------
 # SITUACIÓN 2
@@ -352,17 +401,11 @@ dos estimadores de $\mu$.
     
 ```{r}
 ###############################################################################
-# Estimación de la Media de una Población
-# Comparación de dos estimadores:
+# Estimamos de la Media de una Población X con tamaño 2n
+# Y Comparamos los dos estimadores:
 #   X1 = (1/(2n)) * Σ x_i (usa 2n datos)
 #   X2 = (1/n)  * Σ x_i (usa solo los primeros n datos)
-#
-# Se evidenciará que X1 es mejor ya que tiene menor varianza.
 ###############################################################################
-
-# Cargar las librerías necesarias
-library(ggplot2)
-library(knitr)
 
 # Parámetros de la simulación
 set.seed(123)                # La semilla para grantizar la reproducibilidad
@@ -376,27 +419,27 @@ replicaciones <- 1000        # Número de muestras para la simulacion
 X1 <- numeric(replicaciones) # Estimador que usa 2n datos (todos)
 X2 <- X1  # Estimador que solo usa el primer set de datos
 
-# Simulación: en cada réplica se extrae una muestra de tamaño 2n de la población
+# Simulamos y en cada réplica extraemos una muestra de tamaño 2n de la población
 for(i in 1:replicaciones){
   sample_data <- rnorm(N, mean = mu, sd = sigma)
   X1[i] <- mean(sample_data)        # Usa todos los 2n datos
   X2[i] <- mean(sample_data[1:n])     # Usa solo los primeros n datos
 }
 
-# Calcular las varianzas empíricas (ECM, pues son insesgados)
+# Calculamos las varianzas empíricas (ECM, pues son insesgados)
 ecm_X1 <- var(X1)   # Teóricamente: sigma^2/(2n) = (4)/(100) = 0.04
 ecm_X2 <- var(X2)   # Teóricamente: sigma^2/n   = (4)/(50)  = 0.08
 
 cat("Varianza (ECM) de X1 (2n datos):", ecm_X1, "\n")
 cat("Varianza (ECM) de X2 (n datos):", ecm_X2, "\n")
 
-# Crear un data frame para graficar las densidades de ambos estimadores
+# Creamos un data frame para graficar las densidades de los dos estimadores
 df <- data.frame(
   Estimador = factor(c(rep("X1 (2n datos)", length(X1)), rep("X2 (n datos)", length(X2)))),
   Valor = c(X1, X2)
 )
 
-# Gráfica comparativa: densidades de los estimadores y línea vertical en mu
+# Gráficamos la comparativa entre las densidades de los estimadores y la línea vertical en mu
 g <- ggplot(df, aes(x = Valor, fill = Estimador)) +
   geom_density(alpha = 0.5) +
   geom_vline(xintercept = mu, linetype = "dashed", color = "black", linewidth = 1) +
@@ -408,13 +451,13 @@ g <- ggplot(df, aes(x = Valor, fill = Estimador)) +
 
 print(g)
 
-# Tabla de resumen usando knitr::kable
+# Creamos una tabla de resumen mejorada usando knitr::kable
 ECM_tabla <- data.frame(
   Estimador = c("X1 (2n datos)", "X2 (n datos)"),
   ECM = c(ecm_X1, ecm_X2)
 )
 
-# Imprimir la tabla
+# Mostramos la tabla
 kable(ECM_tabla, caption = "ECM (Varianza empírica) de cada estimador")
 
 ```
@@ -477,11 +520,7 @@ Simule el comportamiento de cada uno de estos estimadores, $R$ o cualquier otra 
 # variando el valor real de θ y el tamaño de muestra n.
 ###############################################################################
 
-# Cargar las librerías necesarias
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-library(knitr)
+#Instalamos la libreria que necesitamos pero no al principio porque causa fallas con tidyr y pivot_longer
 library(gridExtra)
 
 # Parámetros de simulación
@@ -497,15 +536,20 @@ est3 <- numeric(B)   # Estimador (3): max + (max - min)/(n-1)
 est4 <- numeric(B)   # Estimador (4): 2*median - 1
 est5 <- numeric(B)   # Estimador (5): mean + 3*sd
 
-# Simulación: Para cada réplica se extrae una muestra aleatoria de tamaño n de {1,2,...,θ}
+# Simulamos para cada réplica y extraemos una muestra aleatoria de tamaño n de {1,2,...,θ}
 for (i in 1:B) {
   muestra <- sample(1:theta_true, size = n, replace = FALSE)
   
-  # Calcular cada uno de los estimadores:
-  est1[i] <- 2 * mean(muestra) - 1
+  # Calculamos cada uno de los estimadores:
+  # Estimador ajustado de la media, es una forma de ajustar la media muestral.
+  est1[i] <- 2 * mean(muestra) - 1  
+  # Estimador basado en el rango. Utiliza los valores extremos de la muestra para hacer una estimación
   est2[i] <- min(muestra) + max(muestra) - 1
-  est3[i] <- max(muestra) + (max(muestra) - min(muestra)) / (n - 1)
-  est4[i] <- 2 * median(muestra) - 1
+  # estimador ajustado del máximo. Ajusta el valor máximo de la muestra utilizando el rango y el tamaño de la muestra.
+  est3[i] <- max(muestra) + (max(muestra) - min(muestra)) / (n - 1)   
+  # estimador ajustado de la mediana. Similar al primer estimador, ajusta la mediana muestral.
+  est4[i] <- 2 * median(muestra) - 1  
+  # Estimador de la media ajustado por la desviación estándar. Utiliza tanto la media como la desviación estándar de la muestra para hacer una estimación.
   est5[i] <- mean(muestra) + 3 * sd(muestra)
 }
 
@@ -519,13 +563,13 @@ df <- data.frame(
   `θ5` = est5
 )
 
-
 df_long <- pivot_longer(df, cols = -Replication, 
                         names_to = "Estimator", values_to = "Value")
-# Convertir la variable Estimator a factor (usando los valores observados)
+
+# Convertimos la variable Estimator a factor (usando los valores observados)
 df_long$Estimator <- as.factor(df_long$Estimator)
 
-# Graficar las densidades de cada estimador (facetas) con la línea vertical en θ_true
+# Graficamos las densidades de cada estimador (facetas) con la línea vertical en θ_true
 p_dens <- ggplot(df_long, aes(x = Value, fill = Estimator)) +
   geom_density(alpha = 0.5) +
   facet_wrap(~ Estimator, scales = "free") +
@@ -537,7 +581,7 @@ p_dens <- ggplot(df_long, aes(x = Value, fill = Estimator)) +
   scale_fill_brewer(palette = "Set2")
 print(p_dens)
 
-# Calcular sesgo, varianza y ECM para cada estimador y construir una tabla resumen
+# Calculamos ahora el sesgo, varianza y ECM para cada estimador y construimos una tabla de resumen
 summary_table <- df_long %>%
   group_by(Estimator) %>%
   summarise(
@@ -546,10 +590,10 @@ summary_table <- df_long %>%
     ECM = round((mean(Value) - theta_true)^2 + var(Value), 3)
   )
 
-# Imprimir la tabla resumen con knitr::kable
+# Imprimimos la tabla resumen con knitr::kable
 kable(summary_table, digits = 3, caption = "Resumen de los Estimadores: Sesgo, Varianza y ECM")
 
-# Graficar barras comparativas para Bias (valor absoluto), Varianza y ECM
+# Graficamos las barras comparativas para Bias (valor absoluto), Varianza y ECM
 p_bias <- ggplot(summary_table, aes(x = Estimator, y = abs(Bias), fill = Estimator)) +
   geom_bar(stat = "identity") +
   labs(title = "Bias Absoluto de cada Estimador", y = "Bias Absoluto", x = "Estimador") +
@@ -568,9 +612,8 @@ p_ecm <- ggplot(summary_table, aes(x = Estimator, y = ECM, fill = Estimator)) +
   theme_minimal() +
   scale_fill_brewer(palette = "Set2")
 
-# Combinar las tres gráficas en un panel vertical
+# Combinamos las tres gráficas en un panel vertical
 grid.arrange(p_bias, p_variance, p_ecm, ncol = 1)
-
 
 ```
 
@@ -661,80 +704,131 @@ Y conociendo que el **logaritmo de la verosimilitud^[https://halweb.uc3m.es/esp/
 Ahora tomamos el logaritmo de la verosimilitud y lo derivamos respetco a $\lambda$ e igualando a cero:
 $$\frac{d\ell}{d\lambda} = \frac{n}{\lambda} - \sum_{i=1}^{n} x_i = 0 \implies \hat{\lambda}_{MLE} = \frac{n}{\sum_{i=1}^{n} x_i} = \frac{1}{ \bar{X}}$$
 
+
 ```{r}
-# Configuración inicial
-set.seed(123)           # Para reproducibilidad
-M <- 10000              # Número de simulaciones
-n <- 10                 # Tamaño muestral (n > 2)
-lambda_true <- 2        # Valor real de lambda
+###############################################################################
+# Situación 4: Estimación de λ en tiempos entre llamadas de seguros
+###############################################################################
 
-# Inicializar vectores para almacenar los estimadores
-lambda_hat_prop <- numeric(M)  # Estimador propuesto: (n-1)/S_n
-lambda_hat_MLE  <- numeric(M)  # Estimador MLE (y de momentos): n/S_n = 1/mean(X)
+# Parámetro del estimado del valor verdadero
+lambda_real <- 2 
 
-# Simulación de los experimentos
-for(i in 1:M){
-  # Generar n tiempos de atención de una exponencial con parámetro lambda_true
-  X <- rexp(n, rate = lambda_true)
-  S_n <- sum(X)
-  
-  # Estimador propuesto: (n-1)/S_n
-  lambda_hat_prop[i] <- (n - 1) / S_n
-  
-  # Estimador MLE y de momentos: n/S_n = 1/mean(X)
-  lambda_hat_MLE[i] <- n / S_n
+# Tamaños de muestra que vamos a evaluar
+n_values <- c(2, 5, 10, 30, 100)  
+
+# Número de repeticiones en la simulación
+B <- 10000  
+
+# Función para poder generar datos y estimar λ con diferentes métodos
+simular_estimadores <- function(n, B, lambda_real) {
+  estimadores_lambda <- matrix(NA, nrow = B, ncol = 3)
+  colnames(estimadores_lambda) <- c("MLE", "Momentos", "Sesgo_ECM")
+
+  for (i in 1:B) {
+    # Generamos una muestra de tamaño n con distribución exponencial
+    X <- rexp(n, rate = lambda_real)
+    S_n <- sum(X)  # Suma muestral
+
+    # Estimadores:
+    lambda_MLE <- n / S_n               # Máxima Verosimilitud (MLE)
+    lambda_MOM <- 1 / mean(X)           # Momentos: Se usa E(X) = 1/λ → λ_MOM = 1/X̄
+    lambda_sesgado <- (n - 1) / S_n     # Estimador sesgado del problema: (n-1)/S_n
+
+    estimadores_lambda[i, ] <- c(lambda_MLE, lambda_MOM, lambda_sesgado)
+  }
+
+  # Calculamos el sesgo y ECM de cada uno de los estimadores
+  sesgo_MLE <- mean(estimadores_lambda[, "MLE"]) - lambda_real
+  sesgo_MOM <- mean(estimadores_lambda[, "Momentos"]) - lambda_real
+  sesgo_Sesgado <- mean(estimadores_lambda[, "Sesgo_ECM"]) - lambda_real
+
+  ECM_MLE <- mean((estimadores_lambda[, "MLE"] - lambda_real)^2)
+  ECM_MOM <- mean((estimadores_lambda[, "Momentos"] - lambda_real)^2)
+  ECM_Sesgado <- mean((estimadores_lambda[, "Sesgo_ECM"] - lambda_real)^2)
+
+  return(c(Sesgo_MLE = sesgo_MLE, ECM_MLE = ECM_MLE, 
+           Sesgo_MOM = sesgo_MOM, ECM_MOM = ECM_MOM, 
+           Sesgo_Sesgado = sesgo_Sesgado, ECM_Sesgado = ECM_Sesgado))
 }
 
-# Cálculo de sesgo, varianza y ECM para cada estimador
-bias_prop <- mean(lambda_hat_prop) - lambda_true
-var_prop  <- var(lambda_hat_prop)
-mse_prop  <- mean((lambda_hat_prop - lambda_true)^2)
+# Simulamos diferentes tamaños de muestra
+resultados_ECM <- lapply(n_values, function(n) simular_estimadores(n, B, lambda_real))
+names(resultados_ECM) <- paste0("n=", n_values)
 
-bias_MLE <- mean(lambda_hat_MLE) - lambda_true
-var_MLE  <- var(lambda_hat_MLE)
-mse_MLE  <- mean((lambda_hat_MLE - lambda_true)^2)
+###############################################################################
+# Creación de la tabla ECM
+###############################################################################
 
-# Crear una tabla con los resultados finales
-resultados <- data.frame(
-  Estimador = c("Propuesto ((n-1)/S_n)", "MLE (n/S_n = 1/mean(X))"),
-  Sesgo     = c(round(bias_prop, 4), round(bias_MLE, 4)),
-  Varianza  = c(round(var_prop, 6), round(var_MLE, 6)),
-  ECM       = c(round(mse_prop, 6), round(mse_MLE, 6))
+ECM_tabla <- data.frame(
+  n             = n_values,
+  Sesgo_MLE     = sapply(resultados_ECM, function(x) x["Sesgo_MLE"]),
+  ECM_MLE       = sapply(resultados_ECM, function(x) x["ECM_MLE"]),
+  Sesgo_MOM     = sapply(resultados_ECM, function(x) x["Sesgo_MOM"]),
+  ECM_MOM       = sapply(resultados_ECM, function(x) x["ECM_MOM"]),
+  Sesgo_Sesgado = sapply(resultados_ECM, function(x) x["Sesgo_Sesgado"]),
+  ECM_Sesgado   = sapply(resultados_ECM, function(x) x["ECM_Sesgado"])
 )
 
-# Mostrar la tabla de resultados
-print(resultados)
+# Imprimir tabla usando knitr si está disponible
+if(requireNamespace("knitr", quietly = TRUE)){
+  knitr::kable(ECM_tabla, caption = "Sesgo y ECM de los estimadores de λ para diferentes tamaños de muestra")
+} else {
+  print(ECM_tabla)
+}
 
-# Cargar librerías para gráficos
-library(ggplot2)
-library(reshape2)
+###############################################################################
+# Visualización: Comparación de los estimadores
+###############################################################################
 
-# Crear un data frame con los estimadores para los gráficos
-df <- data.frame(`(n-1)/S_n` = lambda_hat_prop, `n/S_n` = lambda_hat_MLE)
-df_melt <- melt(df, variable.name = "Estimador", value.name = "Valor")
+par(mfrow=c(1,2))
 
-# Histograma superpuesto de los estimadores
+# Parámetro real y tamaño de muestra para la simulación de gráficos
+lambda_true <- 2     # Valor real de λ
+n_ejemplo <- 10      # Tamaño de muestra (n)
+B_plot <- 10000      # Número de simulaciones para la visualización
+
+# Creamos una matriz para almacenar los estimadores en cada simulación
+estimadores <- matrix(NA, nrow = B_plot, ncol = 3)
+colnames(estimadores) <- c("MLE", "Momentos", "Sesgado")
+
+# Simulamos B_plot repeticiones
+for (i in 1:B_plot) {
+  X <- rexp(n_ejemplo, rate = lambda_true)  # Muestra de tamaño n_ejemplo
+  S_n <- sum(X)                             # Suma de la muestra
+  
+  # Estimadores
+  estimadores[i, "MLE"] <- n_ejemplo / S_n                  # MLE: λ̂ = n / S_n
+  estimadores[i, "Momentos"] <- 1 / mean(X)                 #  Momentos: λ̂ = 1 / mean(X)
+  estimadores[i, "Sesgado"] <- (n_ejemplo - 1) / S_n        # Estimador sesgado dado en el problema: λ̂ = (n-1) / S_n
+}
+
+# Usamos un data frame y organizamos los datos para pasarle a ggplot
+df_estim <- as.data.frame(estimadores)
+df_melt <- pivot_longer(df_estim, cols = c("MLE", "Momentos", "Sesgado"),
+                        names_to = "Estimador", values_to = "Valor")
+
+# Creamos un Histograma de los estimadores y los superponemos para observarlos
 p1 <- ggplot(df_melt, aes(x = Valor, fill = Estimador)) +
-  geom_histogram(alpha = 0.5, bins = 50, position = "identity") +
-  geom_vline(xintercept = lambda_true, linetype = "dashed", color = "black", size = 1) +
+  geom_histogram(alpha = 0.35, bins = 50, position = "identity") +
+  geom_vline(xintercept = lambda_true, linetype = "dashed", 
+             color = "black", linewidth = 1) +
   labs(title = "Distribución de los Estimadores de λ",
        x = "Valor Estimado de λ", y = "Frecuencia") +
   theme_minimal()
 
-# Boxplot comparativo de los estimadores
+# ahora creamos un Boxplot comparativo de los estimadores
 p2 <- ggplot(df_melt, aes(x = Estimador, y = Valor, fill = Estimador)) +
   geom_boxplot(alpha = 0.7) +
-  geom_hline(yintercept = lambda_true, linetype = "dashed", color = "black", size = 1) +
+  geom_hline(yintercept = lambda_true, linetype = "dashed", 
+             color = "black", size = 1) +
   labs(title = "Boxplot de los Estimadores de λ",
        x = "Estimador", y = "Valor Estimado de λ") +
   theme_minimal()
 
-# Mostrar los gráficos
+# Mostramos los gráficos
 print(p1)
 print(p2)
-
 ```
-
 ## Conclusiones
 *   Tanto en el soporte matemático como el programa en R podemos observar que el estimador $\hat{\lambda}= \frac{n-1}{S_n}$ es **insesgado**.
 
