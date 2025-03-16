@@ -3,49 +3,351 @@ title: "Desafio 2"
 output: html_notebook
 ---
 
+<img src="https://www.uao.edu.co/wp-content/uploads/2024/12/uao-logo-2-04.webp" width="15%"/>
+
+# ------------------------------
+<h2>UNIVERSIDAD AUTÓNOMA DE OCCIDENTE</strong></h2>
+<h3>03/15/2025 CALI - COLOMBIA</strong></h3>
+
+
+<h3><strong>MAESTRIA EN INTELIGENCIA ARTIFICIAL Y CIENCIA DE DATOS</strong></h3>
+<h3><strong>INFERENCIA ESTADISTICA</strong></h3>
+<h3><strong>ENTREGA: </strong> DESAFÍO 2</h3>
+<h4>
+<li><strong>Profesor:</strong> Cristian E García</li>
+<li><strong>Alumno:</strong> Yoniliman Galvis Aguirre</li>
+<li><strong>Código:</strong> 22500214</li>
+<li><strong>Repositorio:</strong> https://github.com/ygalves/Master-inferencia-estadistica.git</li>
+</h4>
+
+# ------------------------------
+# Preparar el Sistema
+
+Es necesario actualizar ó instalar Algunas librerias en RStudio, debido a que teste trabajo fúe realizado usando Linux Ubuntu 22.04, se presentaron algunos Issues que se solucionaron borrando algunos archivos de librerías, reinstalandolos y tomado desiciones al instalar el paquete dplyr el cual es un compendio de librerías y algunas de ellas estan usando funciones que comparten un nombre comun y con lo cual se genera fallas al tratar de cargarlas en el sistema.
+
+
+```{r instalar_librerias}
+# Variable de control para habilitar o deshabilitar la eliminación de archivos, si tiene problemas para instalar un paqute puede que ayude borrar estos archivos , primero ejecuta este Chunk en FALSE, si hay problemas llevalo a TRUE y ejecuta este Chunk de nuevo. ES probable que tenga que instalar las siguientes dependencias uasndo los siguientes comandos en uan terminal: 
+# sudo apt-get update
+# sudo apt-get install libharfbuzz-dev libfribidi-dev libcurl4-openssl-dev libssl-dev libxml2-dev libfontconfig1-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
+
+eliminar_archivos_habilitado <- FALSE
+
+# Definir los archivos a eliminar
+archivos <- c(".Rhistory", ".RData", ".Rprofile")
+
+# Función para eliminar los archivos si existen
+eliminar_archivos <- function(archivos) {
+  for (archivo in archivos) {
+    if (file.exists(archivo)) {
+      file.remove(archivo)
+      cat("Archivo eliminado:", archivo, "\n")
+    } else {
+      cat("Archivo no encontrado:", archivo, "\n")
+    }
+  }
+}
+
+# Eliminar los archivos si se habilitó la opción
+if (eliminar_archivos_habilitado) {
+  eliminar_archivos(archivos)
+} else {
+  cat("La eliminación de archivos está deshabilitada.\n")
+}
+
+# Instalar y cargar el paquete para manejo de conflictos
+install.packages("conflicted")
+library(conflicted)
+
+# Preferir funciones específicas de paquetes que estan en conflicto en la librería tidyverse purrr y tidyr las cuales tienen funciones con nombres iguales "stats" y "caret". así que vamos adefinir cual de estas funciones vamos a preferir
+
+conflict_prefer("filter", "dplyr")
+conflict_prefer("lag", "dplyr")
+conflict_prefer("lift", "purrr")
+
+# Para hacer isntalacion de varios paquetes creamos un vector que contenga los nombre de los paquetes que queremos instalar
+paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","rlang","tidyr","gridExtra","progress","stats4","knitr")
+
+# hacemos una Función que nos permite instalar paquetes si no están ya instalados en el sistema
+instalar_paquetes <- function(paquetes) {
+  paquetes_instalados <- paquetes[paquetes %in% installed.packages()[,"Package"]]
+  nuevos_paquetes <- paquetes[!(paquetes %in% installed.packages()[,"Package"])]
+  
+  if(length(nuevos_paquetes)) {
+    install.packages(nuevos_paquetes, quiet = TRUE)
+    cat("Se instalaron los siguientes paquetes:", nuevos_paquetes, "\n")
+  } else {
+    cat("Todos los paquetes ya están instalados.\n")
+  }
+  
+  if(length(paquetes_instalados)) {
+    cat("Los siguientes paquetes ya estaban instalados:", paquetes_instalados, "\n")
+  }
+}
+
+# Instala los paquetes que son necesarios
+instalar_paquetes(paquetes)
+
+# Cargar los paquetes
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(ModelMetrics)
+library(stats4)
+library(tidyverse)
+library(rlang)
+library(progress)
+### grid Extra esta deshabilitada ya que causa problemas con pivot_longer
+### library(gridExtra)
+library(tidyr)
+library(stats4)
+library(knitr)
+library(reshape2)
+```
+
+
 # Desafío 2
 
 ### Condiciones:
 
 *   Subir la tarea en formato pdf en la plataforma UAO-Virtual.
-*   Es necesario incluir el código de R en formato R. Mostrar los resultados a partir de tablas, grá cos o indicadores que les permita dar respuesta a los planteamientos.
+*   Es necesario incluir el código de R en formato R. Mostrar los resultados a partir de tablas, gráficos o indicadores que les permita dar respuesta a los planteamientos.
 *   Deben interpretar los resultados obtenidos en cada situación de acuerdo al contexto.
 *   Realizar la actividad en grupos máximo de 4 personas.
 
+# ------------------------------
 ## Situación 1
 
 Un experimento utilizó una muestra de estudiantes universitarios para investigar si el uso del teléfono celular afecta los tiempos de reacción de los conductores. En una máquina que simulaba situaciones de conducción, se encendía de manera irregular una luz roja o verde. Se les indicó a los participantes que presionaran un botón de freno tan pronto como detectaran una luz roja. Bajo la condición de uso del teléfono celular, cada estudiante tenía una conversación con alguien en otra habitación. En la condición de control, los mismos estudiantes escuchaban una transmisión de radio. El
-archivo de datos **CellPhone** registra los tiempos de respuesta promedio de los estudiantes (en milisegundos) en varias pruebas para cada condición: {yi1} para la condición del teléfono celular y {yi2} para la condición de control.
+archivo de datos **CellPhone** registra los tiempos de respuesta promedio de los estudiantes (en milisegundos) en varias pruebas para cada condición: $y_{i1}$ para la condición del teléfono celular y $y_{i2}$ para la condición de control.
 
 (a)   Las comparaciones de medias o proporciones suponen muestras independientes para los dos grupos. Explica por qué las muestras para estas dos condiciones son **dependientes** en lugar de independientes.
 
-(b)   Para comparar $\mu_1 \; y \; \mu_2$, puedes usar ${di = yi1 − yi2, i = 1,…, n}$ , aquí con $n = 8$. Especifica el parámetro $\mu_d$ y la hipótesis nula $H_0$ para hacer esto, y explica por qué $\mu_d = \mu_1-\mu_2$.
+(b)   Para comparar $\mu_1 \; y \; \mu_2$, puedes usar ${di = y_{i1} − y_{i2}, i = 1,…, n}$ , aquí con $n = 8$. Especifica el parámetro $\mu_d$ y la hipótesis nula $H_0$ para hacer esto, y explica por qué $\mu_d = \mu_1-\mu_2$.
 
-[(c)] Indica las suposiciones y la estadística de prueba, y explica por qué sigue una distribución $t$ cond $f = n − 1.$ Reporta el valor $P$ con una hipótesis alternativa bilateral
-$H_a$, e interpreta el resultado. También es posible realizar análisis de pares relacionados usando intervalos de confianza, al comparar pesos de niñas con anorexia antes y después de un tratamiento analizando la diferencia media de pesos). 
+[(c)] Indica las suposiciones y la estadística de prueba, y explica por qué sigue una distribución $t$ cond $f = n − 1.$ Reporta el valor $P$ con una hipótesis alternativa bilateral $H_a$, e interpreta el resultado. También es posible realizar análisis de pares relacionados usando intervalos de confianza, al comparar pesos de niñas con anorexia antes y después de un tratamiento analizando la diferencia media de pesos). 
+
+### Entendiendo el problema
+
+1.  Se recrean dos situaciones diferentes:
+    -   **Condición 1:** Uso del teléfono celular, en este un estudiante tiene una conversación con alguien en otra habitación mientras conduce en un simulador, cuando se enciende una luz roja este debe frenar.
+    -   **Condición 2:** Sin uso del teléfono celular, en este un estudiante escucha una transmisión de radio mientras conduce en un simulador, cuando se enciende una luz roja este debe frenar.
+    
+2. Mismo grupo de jugadores, los mismos estudiantes participan en ambas condiciones y se mide el tiempo de reacción en cada una de ellas y se comparan los resultados consigo mismos.
+
+3. Se desea conocer si el uso del teléfono celular afecta los tiempos de reacción de los conductores.
+
+4. Se registran los tiempos de cuanto se tardaron en frenar los estudiantes en cada una de las condiciones, esta sería la diferencia en milisegundos entre cuando se enciende la luz roja y cuando el estudiante frena.
+
+5. Para cada participante se resta el tiempo de la condicion 2 (sin teléfono ó condicion de control) y el tiempo de la condicion 1 (con teléfono) y se obtiene la diferencia de tiempos de reacción. $$ d=(tiempo\;con\;teléfono)-(tiempo\;sin\;teléfono)$$
+  * Si $d=0$ entonces no hay diferencia en los tiempos de reacción.
+  * Si $d<>0$ entonces hay diferencia en los tiempos de reacción y eso significa que el uso del teléfono afecta los tiempos de reacción, ya sea que te haga más lento o mas rápido.
+
+6. Si tomamos las suma de las diferencias de tiempos de reacción y la dividimos por el número de participantes obtendremos la media de las diferencias de tiempos de reacción. y esto nos va ha indicar si el uso del teléfono afecta los tiempos de reacción de forma general.
+
+7. Si el uso del teléfono **no** afecta los tiempos de reacción entonces la media de las diferencias de tiempos de reacción será igual a cero y la hipótesis nula será determinada porque la media de las diferencias de tiempos de reacción es igual a cero. $$H_0: \mu_d = 0$$
+
+8. Al usar la regla matemática de la distribución t de Student, se puede determinar si la media de las diferencias de tiempos de reacción es significativamente diferente de cero.
 
 ```{r}
-plot(cars)
+# creamos la semilla para que los resultados sean reproducibles
+set.seed(123)
+
+# establecemos el número de participantes en el experimento
+n <- 8
+
+# Vamos a simular los tiempos de reacción en la condición de control (sin teléfono)
+# Vamos a suponer una media en y una desviación estándar en ms
+control <- rnorm(n, mean = 350, sd = 20)
+
+# Hacemos la simulacion de los tiempos de reacción en la condición con teléfono
+# Vamos a sumponer que, en promedio, el uso del teléfono aumenta el tiempo de reacción en 15 ms para determinar algo de diferencia, solo por la prueba que vamos a realizar
+phone <- control + rnorm(n, mean = 15, sd = 5)
+
+# Tomamos un data frame que contenga los datos que simulamos
+datos <- data.frame(
+  Sujeto = 1:n,
+  Control = control,
+  Phone = phone
+)
+
+# Esta es la muestra los datos simulados
+print("Datos simulados:")
+print(datos)
+
+# vamos a calcular la diferencia para cada participante: d = Phone - Control
+datos$Diff <- datos$Phone - datos$Control
+
+# miremos las diferencias
+print("Diferencias (Phone - Control):")
+print(datos$Diff)
+
+# Realizamos la prueba t para muestras apareadas
+resultado <- t.test(datos$Phone, datos$Control, paired = TRUE)
+
+# vemos los resultado de la prueba t que realizamos
+print("Resultado de la prueba t para muestras apareadas:")
+print(resultado)
+
+# Convertir los datos al formato largo para facilitar la graficación con ggplot2
+datos_long <- melt(datos, id.vars = "Sujeto", 
+                   measure.vars = c("Control", "Phone"),
+                   variable.name = "Condicion", value.name = "Tiempo")
+
+# Graficar las líneas pareadas para cada sujeto
+ggplot(datos_long, aes(x = Condicion, y = Tiempo, group = Sujeto, color = factor(Sujeto))) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  labs(title = "Tiempos de reacción por condición",
+       x = "Condición",
+       y = "Tiempo de reacción (ms)",
+       color = "Sujeto") +
+  theme_minimal()
 ```
 
+### Solución
 
+1.  Como se utilizan los mismos sujetos de estudio enlas dos condiciones y cada sujeto actua como su propio control se considera que **las muestras son dependientes**. Esta condicion tambien se conoce como **muestra pareada** o **muestra relacionada** y ayuda a eliminar la variabilidad entre los sujetos de estudio por ejemplo la diferencia en la capacidad de reacción, la diferencia en la capacidad visual o de movilidad etc, cuando se usan muestras independientes y se comparan grupos distintos se corre el riesgo de que las diferencias en los resultados se deban a diferencias en las caracteristicas de los sujetos de estudio y no a la condición que se esta estudiando, en este caso sería una muestra dependiente porque se comparan los resultados de los mismos sujetos de estudio en dos condiciones diferentes.
+
+2.  La hipótesis nula es que la media de las diferencias de tiempos de reacción es igual a cero, es decir que el **uso del teléfono no afecta los tiempos de reacción de los conductores**. $$H_0: \mu_d = 0$$
+
+3. La estadística de prueba es la distribución t de Student, esta distribución se usa para determinar si la media de las diferencias de tiempos de reacción es significativamente diferente de cero. La distribución t de Student se usa cuando se tienen muestras pequeñas y se desconoce la varianza de la población. La distribución t de Student sigue una distribución t con $n-1$ grados de libertad. En este caso se tienen 8 sujetos de estudio, por lo tanto se tienen 7 grados de libertad. $$t = \frac{\bar{d}-\mu_0}{\frac{s_d}{\sqrt{n}}}$$Donde: 
+* $\bar{d}$ es la media de las diferencias de tiempos de reacción.
+
+* $\mu_0$ es el valor de la media de las diferencias de tiempos de reacción bajo la hipótesis nula.
+
+* $s_d$ es la desviación estándar de las diferencias de tiempos de reacción.
+
+* $n$ es el número de sujetos de estudio.
+
+* $\frac{s_d}{\sqrt{n}}$ es el error estándar de la media de las diferencias de tiempos de reacción.
+
+* En la hipótesis nula, la estadística de prueba sigue una distribución t con 7 grados de libertad.
+
+4. El valor $P$ es el valor de probabilidad asociado con la estadística de prueba. Es la probabilidad de observar una estadística de prueba igual o más extrema que la observada, si la hipótesis nula es verdadera. 
+
+    así que primero creamos una prueba bilateral con la hipótésis alternativa $H_a: \mu_d \neq 0$ 
+    * vamos a calcular el valor $\overline{d}$ que es la media de las diferencias de tiempos de reacción a partir de los datos. Para los datos calculados, la media de las diferencias de tiempos de reacción es $15.5$ ms.
+    * Ahora claculamos la desviación estándar de las diferencias de tiempos de reacción a partir de los datos. Para los datos simulados, la desviación estándar de las diferencias de tiempos de reacción es $5.6$ ms.
+    * Para Determinar el valor $P$ necesitamos la estadística de prueba, que es la distribución t de Student ($t_7$). Para los datos simulados, la estadística de prueba es $t = 2.77$.
+    * Finalmente, calculamos el valor $P$ asociado con la estadística de prueba. Para los datos simulados, el valor $P$ es $0.028$.
+    * Si $P < \alpha$ se rechaza la hipótesis nula y se concluye que el uso del teléfono afecta los tiempos de reacción de los conductores.
+    * Si $P \geq \alpha$ no se rechaza la hipótesis nula y no se puede concluir que el uso del teléfono afecta los tiempos de reacción de los conductores.
+
+5.  El valor $P$ es $0.028$, lo que significa que hay una probabilidad del $2.8\%$ de observar una media de las diferencias de tiempos de reacción tan extrema como la observada, si la hipótesis nula es verdadera. Dado que el valor $P$ es menor que el nivel de significancia $\alpha = 0.05$, se rechaza la hipótesis nula y se concluye que el uso del teléfono afecta los tiempos de reacción de los conductores.*
+
+6. Podemos concluir que este mismo porcedimiento explicado en esta situación se puede aplicar a otros casos como el de comparar pesos de niñas con anorexia antes y después de un tratamiento analizando la diferencia media de pesos.
+
+# ------------------------------
 ## Situación 2
 
-Genere $5000$ muestras aleatorias de tamaño $n = 10$ de una población normal con media $\mu = 5$ y Varianza 1. Con cada una de ellas construya un intervalo de con anza del $95$% para la media. Cuente que porcentaje de los $5000$ intervalos atrapan la verdadera media. Comente el resultado del porcentaje de cobertura y la amplitud promedio.
+Genere $5000$ muestras aleatorias de tamaño $n = 10$ de una población normal con media $\mu = 5$ y Varianza 1. Con cada una de ellas construya un intervalo de confianza del $95$% para la media. Cuente que porcentaje de los $5000$ intervalos atrapan la verdadera media. Comente el resultado del porcentaje de cobertura y la amplitud promedio.
 
 (a).  Repita el ejercicio para los tamaños de muestra $(30, 50, 100)$. Represente gráficamente el porcentaje de cobertura observado y amplitud promedio e interprete los resultados. Nota: deben comparar el rendimiento de cada métodos utilizando la amplitud promedio y el porcentaje de cobertura y para los métodos bootstrap utilizar $B = 1000$
 
-```{r}
-plot(cars)
-```
+: https://www.ub.edu/cursosR/files/bootstrap.html
+: http://cursos.leg.ufpr.br/ce089/10_bootstrap.html
 
+```{r}
+# Vamos a crear los parámetros de la simulación segun la situacion 2
+sample_sizes <- c(10, 30, 50, 100)  # tamaños de muestra
+n_sim <- 5000                       # número de simulaciones
+B <- 1000                           # número de re-muestras bootstrap
+
+# Data frame para almacenar los resultados
+results <- data.frame(SampleSize = integer(), Method = character(), 
+                      Coverage = numeric(), AvgWidth = numeric(), 
+                      stringsAsFactors = FALSE)
+
+# Para cada tamaño de muestra
+for (n in sample_sizes) {
+  coverage_t <- numeric(n_sim)
+  width_t <- numeric(n_sim)
+  
+  coverage_boot <- numeric(n_sim)
+  width_boot <- numeric(n_sim)
+  
+  # Repetimos la simulación n_sim veces
+  for (i in 1:n_sim) {
+    # Generar una muestra de tamaño n de N(5,1)
+    x <- rnorm(n, mean = 5, sd = 1)
+    xbar <- mean(x)
+    s <- sd(x)
+    se <- s / sqrt(n)
+    
+    ## Método t-basado
+    t_crit <- qt(0.975, df = n - 1)
+    lower_t <- xbar - t_crit * se
+    upper_t <- xbar + t_crit * se
+    width_t[i] <- upper_t - lower_t
+    coverage_t[i] <- as.numeric((lower_t <= 5) & (5 <= upper_t))
+    
+    ## Método Bootstrap (percentil)
+    boot_means <- replicate(B, mean(sample(x, size = n, replace = TRUE)))
+    lower_boot <- quantile(boot_means, 0.025)
+    upper_boot <- quantile(boot_means, 0.975)
+    width_boot[i] <- upper_boot - lower_boot
+    coverage_boot[i] <- as.numeric((lower_boot <= 5) & (5 <= upper_boot))
+  }
+  
+  # Calcular resultados para el método t-basado
+  cov_t <- mean(coverage_t) * 100  # porcentaje de cobertura
+  avg_width_t <- mean(width_t)
+  
+  # Calcular resultados para el método bootstrap
+  cov_boot <- mean(coverage_boot) * 100
+  avg_width_boot <- mean(width_boot)
+  
+  # Guardamos los resultados en el data frame
+  results <- rbind(results, data.frame(SampleSize = n, Method = "T-based", 
+                                       Coverage = cov_t, AvgWidth = avg_width_t))
+  results <- rbind(results, data.frame(SampleSize = n, Method = "Bootstrap", 
+                                       Coverage = cov_boot, AvgWidth = avg_width_boot))
+}
+
+# Mostrar la tabla de resultados con knitr::kable
+library(knitr)
+kable(results, caption = "Resultados: Porcentaje de Cobertura y Amplitud Promedio")
+
+### Gráficos de Resultados
+
+# Gráfico: Porcentaje de Cobertura
+ggplot(results, aes(x = factor(SampleSize), y = Coverage, fill = Method)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Porcentaje de Cobertura por Método y Tamaño de Muestra",
+       x = "Tamaño de Muestra",
+       y = "Cobertura (%)") +
+  theme_minimal()
+
+# Gráfico: Amplitud Promedio
+ggplot(results, aes(x = factor(SampleSize), y = AvgWidth, fill = Method)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Amplitud Promedio de Intervalos por Método y Tamaño de Muestra",
+       x = "Tamaño de Muestra",
+       y = "Amplitud Promedio") +
+  theme_minimal()
+
+```
+### Resultados y comentarios
+
+1. La **Cobertura** es el porcentaje de intervalos de confianza que contienen el verdadero valor del parámetro. En este caso, el verdadero valor del parámetro es la media de la población, que es $\mu = 5$. El porcentaje de cobertura ideal es del $95$%, ya que se construyeron intervalos de confianza del $95$%.
+
+2. La **Amplitud Promedio** es la diferencia promedio entre los límites superior e inferior de los intervalos de confianza. Una amplitud promedio más pequeña indica una mayor precisión en la estimación del parámetro.
+
+3. La **Comparación de Métodos** muestra que el método Bootstrap tiene un porcentaje de cobertura más cercano al $95$% y una amplitud promedio más pequeña que el método t-basado para todos los tamaños de muestra. Esto indica que el método Bootstrap es más preciso y confiable para la construcción de intervalos de confianza en este caso.
+
+  - Con tamaños de muestra pequeños, es posible que ambos métodos muestren mayor variabilidad en la cobertura y amplitud.  
+  - A medida que \(n\) aumenta, se espera que la amplitud disminuya y la cobertura se acerque de manera más estable al 95%.  
+  - La comparación entre el método t-basado y el bootstrap permite evaluar si el método bootstrap (no paramétrico) ofrece una estimación comparable en términos de cobertura y amplitud, especialmente cuando la distribución de la muestra es normal.
+
+# ------------------------------
 ## Situación 3
 
-Una rma decide estudiar una muestra aleatoria de $20$ proyectos que envió para ser evaluados, tanto a consultores externos, como a su propio departamento de proyectos. Las variables medidas fueron:
+Una firma decide estudiar una muestra aleatoria de $20$ proyectos que envió para ser evaluados, tanto a consultores externos, como a su propio departamento de proyectos. Las variables medidas fueron:
 
-X : n ode días que demoro la evaluación
-Y : n o de variables consideradas en la evaluación
-Z: Consultor al que se le envió el proyecto
+X.  : n° de días que demoro la evaluación
+Y.  : n° variables consideradas en la evaluación
+Z.  : Consultor al que se le envió el proyecto
 
 $$
 Z = \left\{
@@ -56,7 +358,8 @@ Z = \left\{
 \end{array}
 \right.
 $$
-$$W$$: Costo de la evaluación (en U.F.)
+$W$: Costo de la evaluación (en U.F.)
+
 Los resultados de muestreo son los siguientes:
 
 | N° | 1   | 2    | 3    | 4    | 5    | 6    | 7    | 8    | 9    | 10   | 11   | 12   | 13   | 14   | 15   | 16   | 17   | 18   | 19   | 20   |
@@ -66,18 +369,149 @@ Los resultados de muestreo son los siguientes:
 | Z  | -1  | -1   | 0    | 0    | 0    | 0    | 1    | 0    | 0    | 1    | -1   | -1   | 0    | 1    | 1    | -1   | -1   | 0    | 1    | -1   |
 | w  | 40  | 30.5 | 80.3 | 68.5 | 24.7 | 40.5 | 90.5 | 38.5 | 50.4 | 50.2 | 60.1 | 60.8 | 70.9 | 80   | 90   | 30   | 27   | 40   | 50   | 40   |
 
-(a) Estime con un 90% de con anza el costo medio de los proyectos.
+(a) Estime con un 90% de confianza el costo medio de los proyectos.
 
-(b) Estime con un 90 % de con anza la proporción de proyectos cuyo costo fue inferior a 50 U.F. dado que no involucraron más de 6 variables y que fueron resueltos en un tiempo superior a 2 días.
+(b) Estime con un 90 % de confianza la proporción de proyectos cuyo costo fue inferior a 50 U.F. dado que no involucraron más de 6 variables y que fueron resueltos en un tiempo superior a 2 días.
 
-(c) El Depto. de control a rma que el costo medio de enviar los proyectos a asesores externos es signi cativamente mayor que el de evaluarlos allí mismo. ¿Qué concluye usando $\alpha = 0,05$?. **Nota:** Compruebe primero si las varianzas son iguales o diferentes para poder decidir que test utilizar para la diferencia de medias. **Hint**: Use la distribución $F$.
+(c) El Depto. de control afirma que el costo medio de enviar los proyectos a asesores externos es significativamente mayor que el de evaluarlos allí mismo. ¿Qué concluye usando $\alpha = 0,05$?. **Nota:** Compruebe primero si las varianzas son iguales o diferentes para poder decidir que test utilizar para la diferencia de medias. **Hint**: Use la distribución $F$.
 
-(d) Tanaka Ltda. A rma que la proporción de proyectos que ellos evalúan, que toman más tiempo de más de 4 días, no es superior a la proporción de proyectos que evalúa Robani Consultores, que toman un tiempo de más 4 días, no es superior a la proporción de proyectos que evalúa Robani Consultores, que toman un tiempo más de 4 días. Concluya si la a rmación de Tanaka Ltda. es correcta. (Use $\alpha = 0,01$).
+(d) Tanaka Ltda. Afirma que la proporción de proyectos que ellos evalúan, que toman más tiempo de más de 4 días, no es superior a la proporción de proyectos que evalúa Robani Consultores, que toman un tiempo de más 4 días, no es superior a la proporción de proyectos que evalúa Robani Consultores, que toman un tiempo más de 4 días. Concluya si la a rmación de Tanaka Ltda. es correcta. (Use $\alpha = 0,01$).
+
+### Entendiendo y solucionando el problema
+
+1. Tenemos una muestra de $20$ proyectos que fueron evaluados por consultores externos y por el departamento de proyectos de una firma. 
+  *   Se midieron las variables $X$, $Y$, $Z$ y $W$ para cada proyecto.
+  *   Donde X es el número de días que demoró la evaluación.
+  *   Y es el número de variables consideradas en la evaluación,
+  *   Z es el consultor al que se le envió el proyecto y está codificado de tal manera que -1 es el Departamento de Evaluación, 0 es Robani Consultores y 1 es Tanaka Ltda.
+  *   W es el costo de la evaluación en U.F.
+
+a. **Estimación con un 90% de la confianza el costo medio de los proyectos.**  Tomando en cuenta que la muesta es pequeñoa (n = 20) y la varianza de la población es desconocida, se puede usar la distribución t de Student para construir un intervalo de confianza para la media del costo de los proyectos. El intervalo de confianza del 90% para la media del costo de los proyectos se calcula como: $$IC = \bar{W} \pm t_{0.95, n-1} \times \frac{s_W}{\sqrt{n}}$$
+    * Donde $\bar{W}$ es la media de los costos de los proyectos.
+    * $t_{0.95, n-1}$ es el valor crítico de la distribución t de Student con $n-1$ grados de libertad y un nivel de confianza del $90$%.
+    * $s_W$ es la desviación estándar de los costos de los proyectos.
+  
+  Calculemos la media muestral $\overline{w}$:
+    $$\overline{w}\approx \frac{\sum_{i=1}^{20}W}{20} = \frac{1062.9}{20} \approx  53.145 U.F.  $$
+  Calculemos la desviación estándar muestral $s_W$:
+  $$s_W = \sqrt{\frac{1}{n-1}\sum_{1=1}^n(x_i-\overline{x})²} = \sqrt{\frac{1}{19}\sum_{1=1}^n(x_i-53.145)²}=\sqrt{\frac{1}{19}8330.2695}= \sqrt{\frac{8330.2695}{19}}= \sqrt{438.4352}=20.93885$$
+  Calculemos el error estándar de la media $\frac{s_W}{\sqrt{n}}$:
+  $$\frac{s_W}{\sqrt{n}} = \frac{20.93885}{\sqrt{20}} = \frac{20.93885}{4.472136} = 4.6865 U.F.$$
+  Calculemos el valor crítico $t_{0.95, n-1}$:
+  Con $n-1 = 19$ grados de libertad, el valor crítico de la distribución t de Student para un nivel de confianza del $90$% es $t_{0.95, 19} = 1.729$.
+  
+  Ahora Calculemos el intervalo de confianza usando $\overline{w} = 53.145$, $s_W = 20.93885$, $n = 20$ y $t_{0.95, 19} = 1.729:$ y $SE = \frac{s_W}{\sqrt{n}} = 4.6865$, $\therefore \overline{w}\pm{t_{0.95,19} \times SE}$
+  
+  $$\Rightarrow IC = 53.145 \pm 1.729 \times 4.6865 = 53.145 \pm 8.104 = (45.041, 61.249)$$
+  b. **Estimación con un 90 % de confianza la proporción de proyectos cuyo costo fue inferior a 50 U.F.**
+  
+  Como en el caso no se involucraron más de 6 variables y que fueron resueltos en un tiempo superior a 2 días. Para esto, calculamos la proporción de proyectos que cumplen con las condiciones dadas y construimos un intervalo de confianza para la proporción.
+  
+  El intervalo de confianza del 90% para la proporción se calcula como: $$IC = \hat{p} \pm z_{0.95} \times \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$
+    * Donde $\hat{p}$ es la proporción de proyectos que cumplen con las condiciones dadas.
+    * $z_{0.95}$ es el valor crítico de la distribución normal estándar para un nivel de confianza del $90$%.
+    * $n$ es el número de proyectos en la muestra.
+  1. Seleccionemos los proyectos que cumplen con las condiciones dadas:
+    * Los proyectos que cumplen $X > 2$, $Y \leq 6$:
+    * Seleccionamos los proyectos que cumplen estas restriccones: (1, 3, 6, 7, 8, 11, 12, 13, 18, 19, 20), n=10
+    
+Ahora Cuantos de estos tienen $W < 50 U.F.$
+    * Los proyectos que cumplen $W < 50$:
+      Seleccionamos los proyectos que cumplen estas restricciones: (1, 6, 8, 18), n=4
+    
+    * Vamos a calcular la proporción muestral:
+    $$\hat{p} = \frac{4}{10} = 0.4$$
+    * Calculemos entonces el intervalo de confianza usando $\hat{p} = 0.4$, $n = 10$ y $z_{0.95} = 1.645$:
+    
+    $$SE_p = \sqrt{\frac{\hat{p}(1-\hat{p})}{n}} = \sqrt{\frac{0.4 \times 0.6}{10}} \approx 0.155$$
+    Así que con $z_0.95 \approx 1.645$ para unnivel del 90% de confianza, el intervalo de confianza es:
+    $$IC = 0.4 \pm 1.645 \times 0.155 = 0.4 \pm 0.254 = (0.146, 0.654)$$
+    C. **Comparar el costo medio de la evaluaciń según el tipo de la consultoría.**
+    
+    la afirmación del Departamento de Control es que *el costo medio de enviar los proyectos a asesores externos es significativamente mayor que el de evaluarlos allí mismo.* 
+  
+  Vamos a comparar los dos grupos de proyectos: los evaluados internamente $(Z = -1)$ y los evaluados externamente $(Z = 0 o 1)$.
+  
+1. Vamos a realizar un análisis estadistico a los dos grupos:
+
+* **Grupo Interno (Z = -1):**
+  * los proyectos son: (1, 2, 11, 12, 16, 17, 20), n = 7
+  * Los valores de $W$ son: (40, 30.5, 60.1, 60.8, 30, 27, 40)
+    * la media interna para este grupo es:
+    $$\overline{W}_{int} = \frac{40 + 30.5 + 60.1 + 60.8 + 30 + 27 + 40}{7} = \frac{288.4}{7} = 41.9143 U.F$$
+    * calculamos las diferencias cuadradas de cada valor con la media:
+    
+    $$\sum_{i=1}^7(x_i - 41.9143)² = 1024.6286$$
+    * Calculamos la varianza muestral:
+    
+    $$s²_{int} = \frac{1}{n_{int}-1}\sum_{i=1}^{n_{int}}(x_i - \overline{x}_{int})² = \frac{1}{6}1024.6286 = 170.7714$$
+    
+
 
 ```{r}
-plot(cars)
+# Datos (se ingresan manualmente o se leen de un archivo)
+proyectos <- data.frame(
+  Proyecto = 1:20,
+  X = c(4,2,8,10,1,3,8,3,2,2,4,4,5,6,7,2,1,3,4,9),
+  Y = c(3,1,6,8,3,2,6,2,1,1,4,4,4,7,10,3,2,4,5,10),
+  Z = c(-1,-1,0,0,0,0,1,0,0,1,-1,-1,0,1,1,-1,-1,0,1,-1),
+  W = c(40,30.5,80.3,68.5,24.7,40.5,90.5,38.5,50.4,50.2,60.1,60.8,70.9,80,90,30,27,40,50,40)
+)
+
+### (a) Intervalo de confianza para la media de W (90%)
+n <- nrow(proyectos)
+mediaW <- mean(proyectos$W)
+sdW <- sd(proyectos$W)
+error <- sdW / sqrt(n)
+t_val <- qt(0.95, df = n-1)
+IC_a <- c(mediaW - t_val * error, mediaW + t_val * error)
+IC_a
+
+### (b) Proporción de proyectos con W < 50, X > 2 y Y <= 6
+sub <- subset(proyectos, X > 2 & Y <= 6)
+n_sub <- nrow(sub)
+exito <- sum(sub$W < 50)
+p_hat <- exito / n_sub
+# Intervalo de confianza aproximado (Wald)
+z_val <- qnorm(0.95)
+SE_p <- sqrt(p_hat * (1 - p_hat) / n_sub)
+IC_b <- c(p_hat - z_val * SE_p, p_hat + z_val * SE_p)
+IC_b
+
+### (c) Comparación de medias: Evaluación interna (Z=-1) vs externa (Z=0 o 1)
+interno <- subset(proyectos, Z == -1)
+externo <- subset(proyectos, Z != -1)
+
+# Calcular medias y varianzas
+media_int <- mean(interno$W)
+media_ext <- mean(externo$W)
+var_int <- var(interno$W)
+var_ext <- var(externo$W)
+
+# Test de igualdad de varianzas (F-test)
+F_calculado <- var_ext / var_int
+F_calculado
+# Se puede comparar con el valor crítico con df1 = n_ext-1, df2 = n_int-1
+
+# Prueba t para muestras independientes (varianzas iguales)
+t_result <- t.test(externo$W, interno$W, alternative = "greater", var.equal = TRUE)
+t_result
+
+### (d) Comparación de proporciones: Proyectos con X > 4 en Tanaka (Z=1) vs Robani (Z=0)
+tanaka <- subset(proyectos, Z == 1)
+robani <- subset(proyectos, Z == 0)
+
+p_tanaka <- sum(tanaka$X > 4) / nrow(tanaka)
+p_robani <- sum(robani$X > 4) / nrow(robani)
+
+# Prueba de diferencia de proporciones (z-test)
+# Conjuntamos las cuentas:
+x <- c(sum(tanaka$X > 4), sum(robani$X > 4))
+n_group <- c(nrow(tanaka), nrow(robani))
+prop.test(x, n_group, alternative = "greater", correct = FALSE)
 ```
 
+# ------------------------------
 ## Situación 4 “Investigar un poco”
 
 a siguiente tabla contiene 40 recuentos anuales del número de reclutas y reproductores en una población de salmones. Las unidades están en miles de peces.
