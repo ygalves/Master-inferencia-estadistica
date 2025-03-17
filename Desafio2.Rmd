@@ -375,7 +375,7 @@ Los resultados de muestreo son los siguientes:
 
 (c) El Depto. de control afirma que el costo medio de enviar los proyectos a asesores externos es significativamente mayor que el de evaluarlos allí mismo. ¿Qué concluye usando $\alpha = 0,05$?. **Nota:** Compruebe primero si las varianzas son iguales o diferentes para poder decidir que test utilizar para la diferencia de medias. **Hint**: Use la distribución $F$.
 
-(d) Tanaka Ltda. Afirma que la proporción de proyectos que ellos evalúan, que toman más tiempo de más de 4 días, no es superior a la proporción de proyectos que evalúa Robani Consultores, que toman un tiempo de más 4 días, no es superior a la proporción de proyectos que evalúa Robani Consultores, que toman un tiempo más de 4 días. Concluya si la a rmación de Tanaka Ltda. es correcta. (Use $\alpha = 0,01$).
+(d) Tanaka Ltda. Afirma que la proporción de proyectos que ellos evalúan, que toman más tiempo de más de 4 días, no es superior a la proporción de proyectos que evalúa Robani Consultores, que toman un tiempo de más 4 días, no es superior a la proporción de proyectos que evalúa Robani Consultores, que toman un tiempo más de 4 días. Concluya si la afirmación de Tanaka Ltda. es correcta. (Use $\alpha = 0,01$).
 
 ### Entendiendo y solucionando el problema
 
@@ -416,19 +416,20 @@ a. **Estimación con un 90% de la confianza el costo medio de los proyectos.**  
     * Seleccionamos los proyectos que cumplen estas restriccones: (1, 3, 6, 7, 8, 11, 12, 13, 18, 19, 20), n=10
     
 Ahora Cuantos de estos tienen $W < 50 U.F.$
-    * Los proyectos que cumplen $W < 50$:
-      Seleccionamos los proyectos que cumplen estas restricciones: (1, 6, 8, 18), n=4
-    
-    * Vamos a calcular la proporción muestral:
-    $$\hat{p} = \frac{4}{10} = 0.4$$
-    * Calculemos entonces el intervalo de confianza usando $\hat{p} = 0.4$, $n = 10$ y $z_{0.95} = 1.645$:
+  
+*   Los proyectos que cumplen $W < 50$: Seleccionamos los proyectos que cumplen estas restricciones: (1, 6, 8, 18), n=4
+* Vamos a calcular la proporción muestral:
+
+$$\hat{p} = \frac{4}{10} = 0.4$$
+* Calculemos entonces el intervalo de confianza usando $\hat{p} = 0.4$, $n = 10$ y $z_{0.95} = 1.645$
     
     $$SE_p = \sqrt{\frac{\hat{p}(1-\hat{p})}{n}} = \sqrt{\frac{0.4 \times 0.6}{10}} \approx 0.155$$
-    Así que con $z_0.95 \approx 1.645$ para unnivel del 90% de confianza, el intervalo de confianza es:
-    $$IC = 0.4 \pm 1.645 \times 0.155 = 0.4 \pm 0.254 = (0.146, 0.654)$$
-    C. **Comparar el costo medio de la evaluaciń según el tipo de la consultoría.**
+Así que con $z_0.95 \approx 1.645$ para unnivel del 90% de confianza, el intervalo de confianza es:
     
-    la afirmación del Departamento de Control es que *el costo medio de enviar los proyectos a asesores externos es significativamente mayor que el de evaluarlos allí mismo.* 
+    $$IC = 0.4 \pm 1.645 \times 0.155 = 0.4 \pm 0.254 = (0.146, 0.654)$$
+C. **Comparar el costo medio de la evaluaciń según el tipo de la consultoría.**
+    
+la afirmación del Departamento de Control es que *el costo medio de enviar los proyectos a asesores externos es significativamente mayor que el de evaluarlos allí mismo.* 
   
   Vamos a comparar los dos grupos de proyectos: los evaluados internamente $(Z = -1)$ y los evaluados externamente $(Z = 0 o 1)$.
   
@@ -437,19 +438,96 @@ Ahora Cuantos de estos tienen $W < 50 U.F.$
 * **Grupo Interno (Z = -1):**
   * los proyectos son: (1, 2, 11, 12, 16, 17, 20), n = 7
   * Los valores de $W$ son: (40, 30.5, 60.1, 60.8, 30, 27, 40)
+    * la media interna para este grupo es:  
+    
+    $$\overline{W}_{int} = \frac{40 + 30.5 + 60.1 + 60.8 + 30 + 27 + 40}{7} = \frac{288.4}{7} = 41.2 U.F$$
+    
+* calculamos las diferencias cuadradas de cada valor con la media:
+    
+    $$\sum_{i=1}^7(x_i - 41.9143)² = \frac{(40-41.2)²+(30.5-41.2)²+(60.1-41.2)²+(60.8-41.2)²+(30-41.2)²+(27-41.2)²+(40-41.2)²}{7}= \frac{1.44+114.49+357.21+384.16+125.44+201.64+1.44}{7}= 1185.82$$
+* Calculamos la varianza muestral:
+    
+    $$s²_{int} = \frac{1}{n_{int}-1}\sum_{i=1}^{n_{int}}(x_i - \overline{x}_{int})² = \frac{1}{6}1185.82 = \frac{1185.82}{6}= 197.6367$$
+    
+* **Grupo Externo (Z = 0 o 1):**
+  * Con $Z=0$ los proyectos son: (3, 4, 5, 6, 8, 13, 18), n = 7
+  * Con $Z=1$ los proyectos son: (7, 9, 10, 14, 15, 19), n = 6
+  * Los valores de $W$ son: (80.3,	68.5,	24.7,	40.5,	90.5,	38.5,	50.4,	50.2,	70.9,	80.0,	90.0,	40.0,	50.0), n = 13
     * la media interna para este grupo es:
-    $$\overline{W}_{int} = \frac{40 + 30.5 + 60.1 + 60.8 + 30 + 27 + 40}{7} = \frac{288.4}{7} = 41.9143 U.F$$
-    * calculamos las diferencias cuadradas de cada valor con la media:
     
-    $$\sum_{i=1}^7(x_i - 41.9143)² = 1024.6286$$
-    * Calculamos la varianza muestral:
+    $$\overline{W}_{ext} = \frac{80.3 +	68.5 + 24.7 + 40.5 + 90.5 + 38.5 + 50.4 + 50.2 + 70.9 + 80.0 + 90.0 + 40.0 + 50.0}{13} = \frac{774.5}{13} = 59.577 U.F$$
     
-    $$s²_{int} = \frac{1}{n_{int}-1}\sum_{i=1}^{n_{int}}(x_i - \overline{x}_{int})² = \frac{1}{6}1024.6286 = 170.7714$$
+* calculamos las diferencias cuadradas de cada valor con la media:
     
+    $$\sum_{i=1}^7(x_i - 59.577)² =  {429.4 + 79.6 + 1216.4 + 363.9 + 956.2 + 444.2 + 84.2 + 87.9 + 128.2 + 417.1 + 925.6 + 383.3 + 91.7}= 5607.8631$$
 
+* Calculamos la varianza muestral:
+    
+    $$s²_{ext} = \frac{1}{n_{int}-1}\sum_{i=1}^{n_{int}}(x_i - \overline{x}_{int})² = \frac{1}{12}5607.8631 = \frac{5607.8631}{12} = 467.3219$$
+2. Vamos a calcular la igualdad de varianzas entre los dos grupos:
+  
+  * Calculamos la razón de varianzas, con el test $F$:
+    
+    $$F = \frac{s²_{ext}}{s²_{int}} = \frac{467.3219}{197.6367} = 2.3645$$
+    
+Con los grados de libertad $df_1 = 12$ (externo) y $df_2 = 6$ (interno), el valor crítico de la distribución $F$ para un nivel de significancia del $5$% es $F_{0.05}(12, 6) = 4$ (buscado en la tabla^[https://datatab.es/tutorial/f-distribution]). Como $F = 2.3645 < F_{0.05}(12, 6) = 4$, **no hay suficiente evidencia para rechazar la hipótesis nula de igualdad de varianzas**.
+
+3. Realizaremos la prueba $t$ para muestras independientes (Varianzas iguales)
+
+* Los datos son $n_I=7,\;n_E=13$, La Diferencia de medias es $\overline{W}_{ext} - \overline{W}_{int} = 59.577 - 41.9143 = 17.6627 U.F$
+* La varianza combinada es 
+
+$$s²_{pooled} = \frac{(n_I-1)s²_{int} + (n_E-1)s²_{ext}}{n_I + n_E - 2} = \frac{(7-1)197.6367 + (13-1)467.3219}{7 + 13 - 2} = \frac{1383.4669 + 5618.8627}{18} = \frac{7002.3296}{18} = 388.9628$$
+
+con $S_p = \sqrt{388.9628} = 19.7221$
+
+Calculamos el Error estándar de la diferencia de medias $\frac{s_p}{\sqrt{n_I} + \sqrt{n_E}}$:
+
+$$SE = S_p\sqrt{\frac{1}{n_I}+\frac{1}{n_E}}= 19.7221\sqrt{\frac{1}{7}+\frac{1}{13}}=9.2459$$
+Ahora el Estadístico de prueba $t$ es:
+
+$$t = \frac{\overline{W}_{ext} - \overline{W}_{int}}{SE} = \frac{17.6627}{9.2459} = 1.91$$
+con $df = n_I + n_E - 2 = 7 + 13 - 2 = 18$
+
+* Decisión:
+Para una prueba unidireccional de $\alpha=0.05$, el valor crítico de la distribución $t$ de Student con $18$ grados de libertad es $t_{0.95, 18} = 1.734$. Como $t = 1.91 > t_{0.95, 18} = 1.734$, Se rechaza la hipótesis nula y se concluye que el costo medio de enviar los proyectos a asesores externos es significativamente mayor que el de evaluarlos allí mismo.
+
+d. **Comparación de proporciones: Proyectos con X > 4 en Tanaka (Z=1) vs Robani (Z=0)**
+
+La afirmación de Tanaka Ltda. es que la proporción de proyectos que ellos evalúan, que toman más tiempo de más de 4 días, no es superior a la proporción de proyectos que evalúa Robani Consultores, que toman un tiempo de más 4 días. Para esto, vamos a comparar las proporciones de proyectos con $X > 4$ en Tanaka y Robani y realizar una prueba de diferencia de proporciones.
+
+1. Seleccionamos los proyectos de Tanaka (Z = 1) y Robani (Z = 0) que cumplen con la condición $X > 4$:
+  * Proyectos de Tanaka $(Z = 1) (7, 10, 14, 15, 19)$ donde $X=(8,2,6,7,4) \therefore\; X > 4 = 8,6,7$ asi que 3 de 5 por tanto $\hat_{P}_T = \frac{3}{5} = 0.6$
+  * Proyectos de Robani $(Z = 0) (3, 4, 5, 6, 13, 18)$ donde $X=(8,10,1,3,2,5,3) \therefore\; X > 4 = 8,10,5$, asi que 3 de 8 por tanto $\hat_{P}_R = \frac{3}{8} = 0.375$
+  
+  Tomando en cuenta que $\hat_{P}_{Tanaka} ) 0.6 > \hat_{P}_{Robani} = 0.375$ podemos decir que la afirmacion de Tanaka no es superior a la de Robani
+  
+  1. Prueba de diferencia de las proporciones
+  
+  *Hipótesis
+  
+    $$H_0: P_{tanaka} \leq P_{robani}$$
+    $$H_{\alpha}: P_{tanaka} > P_{robani}$$
+  
+  Ahora haré la aproximación normal ó prueba de proporciones:
+  
+  $$p=\frac{x_t+x_R}{n_T+n_R}=\frac{3+3}{5+8}=\frac{6}{13}=0.4615$$
+  Calculemos el error estándar:
+  
+  $$SE=\sqrt{p(1-p)(\frac{1}{n_T}+\frac{1}{n_R})}=\sqrt{0.4615 \times 0.5385(\frac{1}{5}+\frac{1}{8})}= 0.2843$$
+  La diferencia muestral es: $$\hat{P}_T-\hat{P}_R = 0.6 - 0.375 = 0.225$$
+  El estadistico z es: $$z = \frac{0.225}{0.2843}=0.79$$
+  
+  2. Decisión:
+  
+  Para un test unidireccional a $\alpha=0.01$, el valor critico de $z_{0.99}\approx2.33 \Rightarrow 0.79 < 2.33$, el p-valor es mayor que $0.01$, por lo que no se rechaza $H_0$
+  
+**Conclusión**: tomando un nivel de 1% no se encuentra evidencia estadística que concluya de forma definitiva que la proporcion de proyectos que toman más de 4 dias evaluados por tanaka es superior a los estudios de Robani.
+Entonces la afirmacion de Tanaka aunque no es superior se puede mantener estadísticamente ya que la prueba no es significativa porque el tamaño de la muestra es muy pequeño así los datos muestrales muestren diferencias.
+  
 
 ```{r}
-# Datos (se ingresan manualmente o se leen de un archivo)
+# Creamos los conjuntos de valores obtenidos del ejercicio
 proyectos <- data.frame(
   Proyecto = 1:20,
   X = c(4,2,8,10,1,3,8,3,2,2,4,4,5,6,7,2,1,3,4,9),
@@ -511,6 +589,83 @@ n_group <- c(nrow(tanaka), nrow(robani))
 prop.test(x, n_group, alternative = "greater", correct = FALSE)
 ```
 
+### Conclusiones
+
+a.  Con un 90% de confianza el costo medio de los proyectos está entre 45.06 y 61.24 U.F aproximadamente.
+b.  Con un 90% de confianza la proporción de proyectos con costo inferior a 50 U.F. y que involucran $\leq6$ variables y toman más de 2 dias., están entre 14.5% y 65.5% aproximadamente.
+c.  Existe significativamente evidencia a $\alpha=0.05$ de que el costo medio de proyectos enviados a asesores externos es mayor que el de evaluarlos internamente
+d.  En un nivel del 1% no se encuentra suficiente evidencia para afirmar que la proporción de proyectos que toman más de 4 días evaluados por tanaka es superior a los de Robani; por lo tanto esta afirmación se mantiene.
+
+
+```{r}
+# Datos proporcionados
+X <- c(4, 2, 8, 10, 1, 3, 8, 3, 2, 2, 4, 4, 5, 6, 7, 2, 1, 3, 4, 9)
+Y <- c(3, 1, 6, 8, 3, 2, 6, 2, 1, 1, 4, 4, 4, 7, 10, 3, 2, 4, 5, 10)
+Z <- c(-1, -1, 0, 0, 0, 0, 1, 0, 0, 1, -1, -1, 0, 1, 1, -1, -1, 0, 1, -1)
+W <- c(40, 30.5, 80.3, 68.5, 24.7, 40.5, 90.5, 38.5, 50.4, 50.2, 60.1, 60.8, 70.9, 80, 90, 30, 27, 40, 50, 40)
+
+# Creación del data frame
+datos <- data.frame(X, Y, Z, W)
+
+# Inciso a: Intervalo de confianza del 90% para el costo medio
+alpha <- 0.10
+n <- length(W)
+media_W <- mean(W)
+desv_W <- sd(W)
+t_critico <- qt(1 - alpha/2, df = n - 1)
+margin_error <- t_critico * (desv_W / sqrt(n))
+intervalo_W <- c(media_W - margin_error, media_W + margin_error)
+
+print("Intervalo de confianza del 90% para el costo medio:")
+print(intervalo_W)
+
+# Inciso b: Estimación de proporción con IC del 90%
+subset_datos <- datos[Y <= 6 & X > 2, ]
+n_cumplen <- sum(subset_datos$W < 50)
+n_total <- nrow(subset_datos)
+prop_cumplen <- n_cumplen / n_total
+se_prop <- sqrt((prop_cumplen * (1 - prop_cumplen)) / n_total)
+z_critico <- qnorm(1 - alpha/2)
+intervalo_prop <- c(prop_cumplen - z_critico * se_prop, prop_cumplen + z_critico * se_prop)
+
+print("Intervalo de confianza del 90% para la proporción de proyectos con ciertas condiciones:")
+print(intervalo_prop)
+
+# Inciso c: Prueba de hipótesis para diferencia de medias
+W_externo <- W[Z != -1]
+W_interno <- W[Z == -1]
+var_test <- var.test(W_externo, W_interno)
+if (var_test$p.value < 0.05) {
+  test_result <- t.test(W_externo, W_interno, var.equal = FALSE)
+} else {
+  test_result <- t.test(W_externo, W_interno, var.equal = TRUE)
+}
+
+print("Prueba de hipótesis para diferencia de medias:")
+print(test_result)
+
+# Inciso d: Prueba de hipótesis para proporciones
+p_tanaka <- sum(X[Z == 1] > 4) / sum(Z == 1)
+p_robani <- sum(X[Z == 0] > 4) / sum(Z == 0)
+n_tanaka <- sum(Z == 1)
+n_robani <- sum(Z == 0)
+p_pool <- (p_tanaka * n_tanaka + p_robani * n_robani) / (n_tanaka + n_robani)
+se_pool <- sqrt(p_pool * (1 - p_pool) * (1/n_tanaka + 1/n_robani))
+z_stat <- (p_tanaka - p_robani) / se_pool
+p_valor_prop <- 2 * (1 - pnorm(abs(z_stat)))
+
+print("Prueba de hipótesis para proporciones:")
+print(paste("z =", z_stat, ", p-valor =", p_valor_prop))
+
+# Gráfico de distribución de costos
+ggplot(datos, aes(x = factor(Z), y = W)) + 
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Distribución de costos por tipo de evaluador", x = "Evaluador", y = "Costo (UF)") +
+  theme_minimal()
+
+```
+
+
 # ------------------------------
 ## Situación 4 “Investigar un poco”
 
@@ -546,3 +701,273 @@ La población total disminuirá si se producen menos reclutas de los reproductor
 (b) Proporcionar una estimación corregida por sesgo y un error estándar correspondiente para el estimador corregido.
 
 (c) Usar bootstrap anidado con pivoteo para encontrar un intervalo de con anza del 95% para el punto de estabilización.
+
+
+### Entendiendo la situación
+
+Esta situación es sobre la acuicultura, la población de salmónidos y como se relacionen la cantidad de reproductores (S) y la cantidad de reclutas (R), los salmones se reproducen una vez antes de morir y eso significa que la próxima generación de peces depende completamente de la cantidad de reproductores disponibles en la población.
+
+El modelo de Beverton-Holt es considerado un modelo clásico en la ecología de poblaciones para describir la relación entre la cantidad de reclutas y reproductores en una población de peces. Este modelo se ajusta mediante regresión lineal con las variables transformadas $\frac{1}{R}$ y $\frac{1}{S}$, y se puede utilizar para estimar el nivel estable de la población donde la cantidad de reclutas es igual a la cantidad de reproductores.
+
+Luego, se deben de usar las técnicas de **bootstrap** ara evaluar la incertidumbre en las estimaciones del modelo.
+
+Si comparamos los modelos más utilizados y su utilización podemos conocer las aplicaciones mas usuales y los modelos usados en este tipo de análisis:
+
+|Modelo|¿R decrece en altos $S$?|¿Hay tope en $R$?|Aplicaciones típicas|
+|------|----------------------|--------------------|-------|
+|Beverton-Holt|$\boxtimes$ No|$\boxdot$ Sí (asintótico)|Peces con crecimiento estable de población|
+|Ricker|$\boxdot$ Sí (rápido)|$\boxtimes$ No  |Peces con canibalismo o competencia intraespecífica alta|
+|Logístico|$\boxdot$ Sí (suave)|$\boxdot$ Sí (límite $K$)|Mamíferos, aves en reservas naturales|
+|Shepherd|$\boxdot$ Sí (muy gradual)|$\boxdot$ Sí (según $b$)|Aves marinas, peces arrecifales|
+|Cushing|$\boxtimes$ No|$\boxtimes$ No|Peces pelágicos con influencia de factores oceanográficos ó ambientales|
+
+### ¿Porqué entonces Beverton-Holt?:
+
+Este modelo explica la regulación de la población.
+  * Si tomamos poblaciones naturales el espacio, el alimento y el refugio es limitado.
+  * Cuando la cantidad e reproductores $S$ es mayor al número de reclutas $S$ la población disminuirá, porque hay más competencia por los recursos.
+  * El modelo de Beverton-Holt puede enfrentar esta situación y predecir el nivel estable de la población usando la forma asintótica de la ecuación.
+
+Es modelo es adecuado para especies con reclutamiento estable y crecimiento de población estable.
+  * En poblaciones como los salmónidos el número de reclutas no crece de forma indefinida con el número de reproductores, hay un límite en que se pueden mantener en la población.
+  * El modelo de Beverton-Holt puede predecir este límite y el nivel estable de la población.
+  * La relacion entre $S$ y $R$ es **no lineal** pero se estabiliza cuando los niveles de $S$ son altos
+
+Este modelo se caracterísa por ser biológicamente realista.
+  * Comparado con Ricker (el cual se usa cuando el reclutamiento disminuye cuando hay valores altos de $S$), Beverton Holt asume que el número de reclutas no disminuye pero si se satura, o sea que cuando el nivel de reproductores es muy alto, el número de reclutas no va ha crecer pero tampoco decrese de forma significativa.
+  * EL modelo Beverton-Holt es consistente con el comportamiento de las poblaciones naturales que están bajo presión de la industria pesquera y por eso es usado en la gestión de pesquerías y acuicultura.
+  
+El modelo se puede linearizar y se puede ajustar usando regresion lineal
+  * La ecuacion de Beverton-Holt se puede linearizar y ajustar mediante regresión lineal, lo que facilita el ajuste del modelo y la estimación de los parámetros. La ecuación es: 
+    
+$$R=\frac{1}{\beta_1+\frac{\beta_2}{S}}$$
+* Donde $R$ es la cantidad de reclutas ó peces jóvenes que ingresan a la población.
+* $S$ es la cantidad de reproductores ó peces adultos que están poniendo huevos.
+* $\beta_1$ y $\beta_2$ son los coeficientes ó parámetros del modelo que se desean estimar.
+    
+Esta ecuación se puede transformar aplicando regresión linea y facilitando la estimación de parámetros en: 
+  
+  $$\frac{1}{R}=\beta_1+\beta_2\left(\frac{1}{S}\right)$$
+    
+  Donde $\beta_1$ y $\beta_2$ son los coeficientes de la regresión lineal.
+  
+### ¿Qué es el Bootstrap?
+
+El **bootstrap** es una técnica de remuestreo que se utiliza para estimar la distribución de un estadístico de interés. Consiste en muestrear con reemplazo de los datos originales para generar múltiples muestras de la misma longitud que la muestra original. Luego, se calcula el estadístico de interés para cada muestra y se utiliza la distribución de estos estadísticos para estimar el error estándar, los intervalos de confianza y realizar pruebas de hipótesis.
+
+* En el lugar de hacer suposiciones sobre la distribución de los datos, el bootstrap puede generar multiples muestras aleatorias a partir de los datos originales.
+* Luego de esto, se puede estimar la variabilidad de un estadístico (como la media o un parámetro del modelo) usandp la variabilidad entre las muestras bootstrap.
+
+##### Como se aplica el Bootstrap?
+
+1. Se toman los datos originales con una cantidad de $n$ observaciones.
+2. Se generan nuevas muestras sintéticas (boostrap) del mismo tamaño $n$ pero con reemplazo, eso significa que algunos datos se repiten.
+3. Se calcula el estadístico de interés para cada muestra bootstrap.
+4. Se repite el proceso de remuestreo muchas veces ($B$ veces) para obtener una distribución de los estadísticos, con un $B = 1000$ típicamente.
+5. Se construye el intérvalo de confianza usando la distribución obtenida de $B$ muestras bootstrap.
+
+En esta situación se desea aplica el modelo Neverton-Holt para estimar:
+  * El nivel estable de la población donde $R = S$.
+  * Un intervalo de confianza del 95% para el nivel estable de la población.
+  * Un error estándar para la estimación.
+  * Un intervalo de confianza corregido por sesgo.
+  
+Sin embargo el modelo de Beverton-Holt no tiene una distribución conocida para sus estimadores, no se puede asumir normalidad porque los datos del ejercicio o son muy numerosos y porque la incertidumbre sobre los parámetros ($\beta_1,\beta_2$) afecta la estimación del punto de estabilización.
+
+Por esto es necesario aplicar **bootstrap** simulando multiples veces la variabilidad de los datos y obtener una distribución de los estimadores para el nivel estable de la población y oder calcular un intervalo de confianza y un error estándar para la estimación.
+
+Bootstrap nos evita tener que suponer la normalidad de los datos, funciona bien en muestras pequeñas y modelos no lineales y las estimaciones de incertidumbre resultantes tienen una mayor precisión que los métodos tradicionales.
+
+### Solución
+
+1. Tomamos el modelo de Beverton-Holt:
+$$R=\frac{1}{\beta_1+\frac{\beta_2}{S}}, \quad \beta_1\geq0,\;\beta_2\geq0.$$
+Volvemos el sistema lineal usando la inversa de la ecuación:
+$$\frac{1}{R}= \beta_1+\beta_2\left(\frac{1}{S}\right)$$
+Ahora:
+
+1. Definimos para cad observacion que:
+  * $y_i = \frac{1}{R_i}$
+  * $x_i=\frac{1}{S_i}$
+2. Vamos a ajustar el modelo de regresion lineal de la siguiente forma:
+  
+$$y_i=\beta-1+\beta_2x_i+\epsilon_i$$
+Aplicando el método de los mínimos cuadrados se estiman:
+
+$$\hat{\beta_2}=\frac{\sum_{i=1}^{n}(x_i-\overline{x})(y_i-\overline{y})}{\sum_{i=1}^{n}(x_i-\overline{x})^2},\quad\hat{\beta_1}=\overline{y}-\hat{\beta_2}\overline{x}.$$
+2. Estimacion del nivel de estabilidad
+Para mantener la población se debe cumplir que R * S entonces:
+
+$$R = S =\frac{1}{\beta_1+\frac{\beta_2}{S}} \Rightarrow S\left(\beta_1+\frac{\beta_2}{S}\right)=1$$
+
+ahora simplificamos:
+
+$$S\beta_1 + \beta_2 = 1 \Rightarrow S = \frac{1 - \beta_2}{\beta_1} = \hat{S}_{estable} \quad \therefore \quad 1- \hat{\beta_2} > 0 \quad \hat{\beta_s} > 0$$
+Para representar los calculos necesarios para resolvero esta situación vamos a tomar el primer conjunto de datos deonde $R=68,S=56$
+
+1. Calculamos $x-i=\frac{1}{S_i} \quad y \quad y_i=\frac{1}{R_i}$
+
+$$R_1 = 68 \Rightarrow y_1 \approx \frac{1}{68}\approx 0.01471, \qquad S_1=56 \Rightarrow x_1\approx\frac{1}{56}\approx0.01786$$
+Ahora se obtienen $B_1$ y $B_2$ usando el método de mínimos cuadrados ordinarios ó MCO, de esta forma minimizamos la suma de los cuadrados de los residuos:
+
+1. Derivamos respecto $S(\beta_1,\beta_2) \text{ con respecto de } \beta_1 \text{ igualado a cero}$
+
+$$S(\beta_1,\beta_2) = \sum_{i=1}^{n}(y_i-\beta_1-\beta_2x_i)^2 \Rightarrow \frac{\partial S}{\partial \beta_1} = -2 \sum_{i=1}^{n} (y_i - \beta_1 - \beta_2 x_i) = 0$$
+$$\sum_{i=1}^{n}y_i=n\beta_1+\beta_2\sum_{i=1}^{n}x_i \quad \text{Dividido por n} \quad \overline{y}=\beta_1+\beta_2\overline{x} \Rightarrow \hat{\beta_1}=\overline{y}-\hat{\beta_2}\overline{x}$$
+1. Derivamos respecto $S(\beta_1,\beta_2) \text{ con respecto de } \beta_2 \text{ igualado a cero}$
+
+$$\frac{\partial S}{\partial \beta_2} = -2 \sum_{i=1}^{n} x_i(y_i - \beta_1 - \beta_2 x_i) = 0 \Rightarrow \sum_{i=1}^{n}x_iy_i=\beta_1\sum_{i=1}^{n}x_i+ \beta_2\sum_{i=1}^{n}x_i^2$$
+Vamos a sustituir $\beta_1=\overline{y}-\beta_2\overline{x}$:
+
+$$\sum_{i=1}^{n}x_iy_i=(\hat{y}-\beta_2\overline{x})\sum_{i=1}^{n}x_i+\beta_2\sum_{i=1}^{n}x_i^2 \Rightarrow\hat{\beta_2}=\frac{\sum_{i=1}^{n}(x_i-\overline{x})(y_i-\overline{y})}{\sum_{i=1}^{n}(x_i-\overline{x})^2}.$$
+Obtenemos:
+* Pendiente: $\hat{\beta_2}=\frac{\sum_{i=1}^{n}(x_i-\overline{x})(y_i-\overline{y})}{\sum_{i=1}^{n}(x_i-\overline{x})^2}.$
+* Ordenada de origen: $\hat{\beta_1}=\overline{y}-\hat{\beta_2}\overline{x}$
+2. Aplicación del modelo beverton-Hold donde: $\frac{1}{R}=\beta_1+\beta_2\frac{1}{S}$
+
+Ahora dada la primera observacion de la primera y segunda  muestra; calculamos:
+
+* Observación 1 $R_1=68, S_1=56$
+
+$$x_1=\frac{1}{56}\approx0.01786, \quad y_1=\frac{1}{68}\approx0.01471$$
+* Observación 2 $R_2=222, S_2=351$
+
+$$x_1=\frac{1}{222}\approx0.00285, \quad y_1=\frac{1}{351}\approx0.00450$$
+Calculamos las medias para n=2
+
+$$\overline{x}= \frac{x_1+x_2}{2}=\frac{0.01786+0.00285}{2}\approx\frac{0.02071}{2}\approx0.010355$$
+$$\overline{y}= \frac{y_1+y_2}{2}=\frac{0.01471+0.00450}{2}\approx\frac{0.01921}{2}\approx0.009605$$
+Calculamos para cada observacion$\hat{\beta_2}$
+* Para i =1: $x_1-\overline{x}=0.01786-0.010355\approx0.007505, y_1-\overline{y}=0.01471-0.009605\approx0.005105$
+* Para i =2: $x_2-\overline{x}=0.00285-0.010355\approx-0.007505, y_2-\overline{y}=0.00450-0.009605\approx-0.005105$
+
+el numerador es: $(x_1-\overline{x})(y_1-\overline{y})+(x_2-\overline{x})(y_2-\overline{y})=(0.007505)(0.005105)+(-0.007505)(-0.005105)$
+
+**Se observa que ambos términos son iguales**
+
+$$(0.007505)(0.005105)\approx0.000038277\approx (-0.007505)(-0.005105)$$
+la suma de ambos valores es: $0.000038277 + 0.000038277 = 0.000076554$
+
+EL denominador es: $(x_1-\overline{x})^2+(x_2-\overline{x})^2=(0.007505)^2+(-0.007505)^2=2\times(0.007505)^2 \approx 0.00011262$
+
+**La pendiente es:**
+
+$$\hat{\beta_2}=\frac{0.000076554}{0.00011262}\approx0.680$$
+Calculamos ahora $\hat{\beta_1}$ usando: $\hat{\beta_1}=\overline{y}-\hat{\beta_2}\overline{x}$
+
+$$\hat{\beta_1}=0.009605-0.680\times0.010355\approx0.009605-0.007041\approx0.002564$$
+Solo con estos dos valores hemos obtenido la recta de la regresión: 
+
+$$\hat{y}=\hat{\beta_1}+\hat{\beta_2}x \quad\therefore\quad\hat{\beta_1}\approx0.002564\text{  y  }\hat{\beta_2}\approx0.680$$$
+Entonces en el modelo: 
+
+$$\frac{1}{R}\approx0.002564+0.680\left(\frac{1}{S}\right)$$
+
+* Estimación del nivel estable de la poblacion de salmonidos:
+
+1. Queremos encontrar el punto donde $R=S$ iniciando desde $R=\frac{1}{\beta_1+ \frac{\beta_2}{S}}$
+2. Despejamos en la formula ya calculada para $\hat{S}_{estable}$, entonces:
+
+$$\hat{S}_{estable}=\frac{1-\hat{\beta_2}}{\hat{\beta_1}} = \frac{1-0.680}{0.002564}\approx\frac{0.320}{0.002564}\approx124.75$$
+Lo que significa que según el modelo y las dos observaciones usadas como ejemplo el nivel estable de la población ha sido estimada en 124.75 (miles de peces) para los reproductores y los 124.75 (miles de peces) para los reclutas para una población total de 249.5 (miles de peces)
+
+```{r}
+# Cargar paquetes necesarios
+library(boot)
+library(ggplot2)
+
+# Definir los datos de Reclutas (R) y Reproductores (S)
+reclutas <- c(68, 222, 311, 244, 77, 205, 166, 222, 299, 233, 248, 195, 
+              220, 228, 161, 203, 142, 188, 226, 210, 287, 132, 67, 275, 
+              276, 285, 201, 286, 115, 188, 267, 275, 64, 224, 121, 304, 
+              206, 121, 301, 214)
+
+reproductores <- c(56, 351, 412, 265, 62, 282, 176, 301, 445, 310, 313, 234, 
+                   279, 266, 162, 229, 138, 256, 368, 270, 428, 144, 54, 478, 
+                   319, 447, 214, 419, 102, 186, 429, 490, 51, 389, 115, 430, 
+                   289, 113, 407, 235)
+
+# Transformaciones de variables para el modelo de Beverton-Holt
+inv_R <- 1 / reclutas
+inv_S <- 1 / reproductores
+
+# Ajuste del modelo mediante regresión lineal
+modelo <- lm(inv_R ~ inv_S)
+
+# Obtener coeficientes beta1 y beta2
+beta1 <- coef(modelo)[1]
+beta2 <- coef(modelo)[2]
+
+# Estimación del nivel estable de población donde R = S
+S_estable <- beta2 / (1 - beta1)
+cat("Estimación del nivel estable de la población:", S_estable, "\n")
+
+# Función de remuestreo para bootstrap de residuos
+boot_resid <- function(data, indices) {
+  residuos <- residuals(modelo)
+  pred <- fitted(modelo) + sample(residuos, replace = TRUE)
+  nuevo_modelo <- lm(pred ~ inv_S)
+  beta1_boot <- coef(nuevo_modelo)[1]
+  beta2_boot <- coef(nuevo_modelo)[2]
+  beta2_boot / (1 - beta1_boot)
+}
+
+# Bootstrap de residuos con B = 1000
+set.seed(123)
+boot_resid_result <- boot(data.frame(inv_S, inv_R), boot_resid, R = 1000)
+
+# Función de remuestreo para bootstrap de casos
+boot_casos <- function(data, indices) {
+  datos_boot <- data[indices, ]
+  modelo_boot <- lm(inv_R ~ inv_S, data = datos_boot)
+  beta1_boot <- coef(modelo_boot)[1]
+  beta2_boot <- coef(modelo_boot)[2]
+  beta2_boot / (1 - beta1_boot)
+}
+
+# Bootstrap de casos con B = 1000
+set.seed(123)
+boot_casos_result <- boot(data.frame(inv_S, inv_R), boot_casos, R = 1000)
+
+# Calcular intervalos de confianza del 95% para ambos métodos
+IC_resid <- boot.ci(boot_resid_result, type = "perc")$percent[4:5]
+IC_casos <- boot.ci(boot_casos_result, type = "perc")$percent[4:5]
+
+cat("Intervalo de confianza (Bootstrap de residuos):", IC_resid, "\n")
+cat("Intervalo de confianza (Bootstrap de casos):", IC_casos, "\n")
+
+# Histogramas de las distribuciones bootstrap
+df_resid <- data.frame(S_estable = boot_resid_result$t)
+df_casos <- data.frame(S_estable = boot_casos_result$t)
+
+p1 <- ggplot(df_resid, aes(x = S_estable)) +
+  geom_histogram(binwidth = 10, fill = "blue", alpha = 0.5, color = "black") +
+  ggtitle("Bootstrap de residuos") + xlab("S_estable") + ylab("Frecuencia")
+
+p2 <- ggplot(df_casos, aes(x = S_estable)) +
+  geom_histogram(binwidth = 10, fill = "red", alpha = 0.5, color = "black") +
+  ggtitle("Bootstrap de casos") + xlab("S_estable") + ylab("Frecuencia")
+
+# Mostrar los gráficos
+library(gridExtra)
+grid.arrange(p1, p2, ncol = 2)
+
+# Estimación corregida por sesgo
+sesgo <- mean(boot_casos_result$t) - S_estable
+S_estable_corregido <- S_estable - sesgo
+cat("Estimación corregida por sesgo:", S_estable_corregido, "\n")
+
+# Bootstrap anidado con pivoteo para obtener un IC del 95%
+bootstrap_anidado <- function(data, indices) {
+  subdata <- data[indices, ]
+  boot_intermedio <- boot(subdata, boot_casos, R = 100)
+  quantile(boot_intermedio$t, c(0.025, 0.975))
+}
+
+set.seed(123)
+boot_anidado_result <- boot(data.frame(inv_S, inv_R), bootstrap_anidado, R = 1000)
+
+IC_anidado <- apply(boot_anidado_result$t, 2, mean)
+cat("Intervalo de confianza (Bootstrap anidado):", IC_anidado, "\n")
+```
+
