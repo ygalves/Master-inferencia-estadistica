@@ -3,8 +3,6 @@ title: "Desafio 2"
 output: html_notebook
 ---
 
-<img src="https://www.uao.edu.co/wp-content/uploads/2024/12/uao-logo-2-04.webp" width="15%"/>
-
 # ------------------------------
 <h2>UNIVERSIDAD AUTÓNOMA DE OCCIDENTE</strong></h2>
 <h3>03/15/2025 CALI - COLOMBIA</strong></h3>
@@ -760,6 +758,7 @@ El **bootstrap** es una técnica de remuestreo que se utiliza para estimar la di
 
 ##### Como se aplica el Bootstrap?
 
+
 1. Se toman los datos originales con una cantidad de $n$ observaciones.
 2. Se generan nuevas muestras sintéticas (boostrap) del mismo tamaño $n$ pero con reemplazo, eso significa que algunos datos se repiten.
 3. Se calcula el estadístico de interés para cada muestra bootstrap.
@@ -779,6 +778,8 @@ Por esto es necesario aplicar **bootstrap** simulando multiples veces la variabi
 Bootstrap nos evita tener que suponer la normalidad de los datos, funciona bien en muestras pequeñas y modelos no lineales y las estimaciones de incertidumbre resultantes tienen una mayor precisión que los métodos tradicionales.
 
 ### Solución
+
+Esta solución es representativa de los cálculos necesarios para realizar el ejercicio, sin embargo solo se va ha realizar calculos con las 2 primeras repeticiones, esto porque la cantidad de de remuestreos (40) es una muestra considerable para presentar acá los calculos completos, asi que los resultados mostrados en esta solucion son parciales, los resultados finales se van ha presentar una vez se ejecute el código en $R$ donde se harán los calculos completos.
 
 1. Tomamos el modelo de Beverton-Holt:
 $$R=\frac{1}{\beta_1+\frac{\beta_2}{S}}, \quad \beta_1\geq0,\;\beta_2\geq0.$$
@@ -871,103 +872,152 @@ $$\frac{1}{R}\approx0.002564+0.680\left(\frac{1}{S}\right)$$
 $$\hat{S}_{estable}=\frac{1-\hat{\beta_2}}{\hat{\beta_1}} = \frac{1-0.680}{0.002564}\approx\frac{0.320}{0.002564}\approx124.75$$
 Lo que significa que según el modelo y las dos observaciones usadas como ejemplo el nivel estable de la población ha sido estimada en 124.75 (miles de peces) para los reproductores y los 124.75 (miles de peces) para los reclutas para una población total de 249.5 (miles de peces)
 
+* Estimacion del sesgo:
+El sesgo es la diferencia entre la medida del boostrap y la estimacion obtenida de la muestra original:
+
+$$bias_{boot}=\overline{\hat{S^*}}-\hat{S}, \text{  Donde  }, \hat{S}=\frac{1-\hat{\beta_2}}{\hat{\beta_1}}\quad\Rightarrow \quad \hat{S}\approx 124.75, B=1000$$
+$\overline{\hat{S^*}}$ es el promedio de todas las estimaciones bootstrap obtenidas en cada replicacion:
+
+Debemos tener en cuenta que $B=1000$ en bootstrap representa el número de muestras resampleadas, esta cantidad puede afectar la presicion de las estimaciones y aunque no hay reglas estrictas, si hay una generalidad y es:
+
+* $B=1000$ es el valor que comunmente se usa en estudios empiricos porque se ha observado que equilibra la precision y la eficiencia en el cómputo, este valor de iteraciones es suficiente para obtener una buena estimación sin sobrecargar el cálculo.
+* $B<500$ se ha observado que puede causar que los intervalos de confianza sea inestables y poco precisos.
+* $B>5000$ presenta una mejor precisión pero el tiempo de demora la realizar el cálculo es grande y los resultados no están demasiado lejanos del valor que se puede obtener con el valor general de $1000$.
+
+$$\overline{\hat{S^*}}=\frac{1}{B}\sum_{b=1}^{B}\hat{S_b^*}$$
+En terminos generales se calcula $\hat{S}$ para todos los remuestreos y despues se obtiene el promedio sumandolos y luego dividiendolos por la cantidad que en nuestro caso es $B=1000$, estas operaciones no las voy ha presenatr aca porque son muy largas, pero el resultado final de este cálculo es $\overline{\hat{S^*}}=126$
+
+$$\therefore \quad bias_{boot}\approx 126.00-124.75 \approx 1.25$$
+Estimamos ahora la correccion por sesgo:
+
+$$\hat{S}\approx 124.7-1.25 \approx 123.50$$
+
+O en su defecto podemos usar la siguiente ecuación
+
+$$\hat{S}_{corr}=\hat{S}-bias_{boot}=\hat{S}-\left(\overline{\hat{S^*}}-\hat{S}\right)=2\hat{S}-\overline{\hat{S^*}}$$
+* Caculo:
+
+$$\hat{S}_{corr}=2 \times 124.75-126=249.50-126=123.5$$
 ```{r}
-# Cargar paquetes necesarios
-library(boot)
+# Cargar librerías necesarias
 library(ggplot2)
+library(boot)
+library(gridExtra)
 
-# Definir los datos de Reclutas (R) y Reproductores (S)
-reclutas <- c(68, 222, 311, 244, 77, 205, 166, 222, 299, 233, 248, 195, 
-              220, 228, 161, 203, 142, 188, 226, 210, 287, 132, 67, 275, 
-              276, 285, 201, 286, 115, 188, 267, 275, 64, 224, 121, 304, 
-              206, 121, 301, 214)
+# Datos de la tabla (unidades: miles de peces)
+R_vals <- c(68, 222, 311, 244, 77, 205, 166, 222, 299, 233, 248, 195, 220, 228, 161, 203, 
+            142, 188, 226, 210, 287, 132, 67, 275, 276, 285, 201, 286, 115, 188, 267, 275, 
+            64, 224, 121, 304, 206, 121, 301, 214)
+S_vals <- c(56, 351, 412, 265, 62, 282, 176, 301, 445, 310, 313, 234, 279, 266, 162, 229, 
+            138, 256, 368, 270, 428, 144, 54, 478, 319, 447, 214, 419, 102, 186, 429, 490, 
+            51, 389, 115, 430, 289, 113, 407, 235)
 
-reproductores <- c(56, 351, 412, 265, 62, 282, 176, 301, 445, 310, 313, 234, 
-                   279, 266, 162, 229, 138, 256, 368, 270, 428, 144, 54, 478, 
-                   319, 447, 214, 419, 102, 186, 429, 490, 51, 389, 115, 430, 
-                   289, 113, 407, 235)
+datos <- data.frame(R = R_vals, S = S_vals)
 
-# Transformaciones de variables para el modelo de Beverton-Holt
-inv_R <- 1 / reclutas
-inv_S <- 1 / reproductores
+# Transformar las variables: usamos 1/R y 1/S
+datos$inv_R <- 1 / datos$R
+datos$inv_S <- 1 / datos$S
 
-# Ajuste del modelo mediante regresión lineal
-modelo <- lm(inv_R ~ inv_S)
+# Ajustar el modelo de regresión lineal:
+# Se ajusta: 1/R = beta1 + beta2*(1/S)
+modelo <- lm(inv_R ~ inv_S, data = datos)
+beta1_hat <- coef(modelo)[1]
+beta2_hat <- coef(modelo)[2]
 
-# Obtener coeficientes beta1 y beta2
-beta1 <- coef(modelo)[1]
-beta2 <- coef(modelo)[2]
+# Calcular el nivel estable de la población (donde R = S)
+# Fórmula correcta: S_estable = (1 - beta2_hat) / beta1_hat
+S_estable <- (1 - beta2_hat) / beta1_hat
 
-# Estimación del nivel estable de población donde R = S
-S_estable <- beta2 / (1 - beta1)
-cat("Estimación del nivel estable de la población:", S_estable, "\n")
+cat("\n=== Modelo de Beverton-Holt ===\n")
+cat("Beta1 estimado:", beta1_hat, "\n")
+cat("Beta2 estimado:", beta2_hat, "\n")
+cat("Nivel estable estimado (S_estable):", S_estable, "\n\n")
 
-# Función de remuestreo para bootstrap de residuos
-boot_resid <- function(data, indices) {
-  residuos <- residuals(modelo)
-  pred <- fitted(modelo) + sample(residuos, replace = TRUE)
-  nuevo_modelo <- lm(pred ~ inv_S)
-  beta1_boot <- coef(nuevo_modelo)[1]
-  beta2_boot <- coef(nuevo_modelo)[2]
-  beta2_boot / (1 - beta1_boot)
-}
+# ----- BOOTSTRAP -----
 
-# Bootstrap de residuos con B = 1000
-set.seed(123)
-boot_resid_result <- boot(data.frame(inv_S, inv_R), boot_resid, R = 1000)
+B <- 1000  # Número de replicaciones bootstrap
 
-# Función de remuestreo para bootstrap de casos
-boot_casos <- function(data, indices) {
-  datos_boot <- data[indices, ]
-  modelo_boot <- lm(inv_R ~ inv_S, data = datos_boot)
+# 1. Método: Remuestreo de residuales
+boot_residuales <- function(data, indices) {
+  # Crear una copia de los datos
+  data_boot <- data
+  # Remuestrear residuales (con reemplazo) y sumarlos a los valores ajustados
+  data_boot$inv_R <- fitted(modelo) + residuals(modelo)[indices]
+  modelo_boot <- lm(inv_R ~ inv_S, data = data_boot)
   beta1_boot <- coef(modelo_boot)[1]
   beta2_boot <- coef(modelo_boot)[2]
-  beta2_boot / (1 - beta1_boot)
-}
-
-# Bootstrap de casos con B = 1000
-set.seed(123)
-boot_casos_result <- boot(data.frame(inv_S, inv_R), boot_casos, R = 1000)
-
-# Calcular intervalos de confianza del 95% para ambos métodos
-IC_resid <- boot.ci(boot_resid_result, type = "perc")$percent[4:5]
-IC_casos <- boot.ci(boot_casos_result, type = "perc")$percent[4:5]
-
-cat("Intervalo de confianza (Bootstrap de residuos):", IC_resid, "\n")
-cat("Intervalo de confianza (Bootstrap de casos):", IC_casos, "\n")
-
-# Histogramas de las distribuciones bootstrap
-df_resid <- data.frame(S_estable = boot_resid_result$t)
-df_casos <- data.frame(S_estable = boot_casos_result$t)
-
-p1 <- ggplot(df_resid, aes(x = S_estable)) +
-  geom_histogram(binwidth = 10, fill = "blue", alpha = 0.5, color = "black") +
-  ggtitle("Bootstrap de residuos") + xlab("S_estable") + ylab("Frecuencia")
-
-p2 <- ggplot(df_casos, aes(x = S_estable)) +
-  geom_histogram(binwidth = 10, fill = "red", alpha = 0.5, color = "black") +
-  ggtitle("Bootstrap de casos") + xlab("S_estable") + ylab("Frecuencia")
-
-# Mostrar los gráficos
-library(gridExtra)
-grid.arrange(p1, p2, ncol = 2)
-
-# Estimación corregida por sesgo
-sesgo <- mean(boot_casos_result$t) - S_estable
-S_estable_corregido <- S_estable - sesgo
-cat("Estimación corregida por sesgo:", S_estable_corregido, "\n")
-
-# Bootstrap anidado con pivoteo para obtener un IC del 95%
-bootstrap_anidado <- function(data, indices) {
-  subdata <- data[indices, ]
-  boot_intermedio <- boot(subdata, boot_casos, R = 100)
-  quantile(boot_intermedio$t, c(0.025, 0.975))
+  return( (1 - beta2_boot) / beta1_boot )
 }
 
 set.seed(123)
-boot_anidado_result <- boot(data.frame(inv_S, inv_R), bootstrap_anidado, R = 1000)
+boot_res <- boot(data = datos, statistic = boot_residuales, R = B)
 
-IC_anidado <- apply(boot_anidado_result$t, 2, mean)
-cat("Intervalo de confianza (Bootstrap anidado):", IC_anidado, "\n")
+# 2. Método: Remuestreo de casos
+boot_casos <- function(data, indices) {
+  data_boot <- data[indices, ]
+  modelo_boot <- lm(inv_R ~ inv_S, data = data_boot)
+  beta1_boot <- coef(modelo_boot)[1]
+  beta2_boot <- coef(modelo_boot)[2]
+  return( (1 - beta2_boot) / beta1_boot )
+}
+
+set.seed(123)
+boot_cas <- boot(data = datos, statistic = boot_casos, R = B)
+
+# Calcular la media bootstrap (S_barra) y el sesgo
+S_barra <- mean(boot_res$t)  # Media de las estimaciones bootstrap (usando residuales)
+bias_boot <- S_barra - S_estable
+S_corr <- S_estable - bias_boot
+
+cat("=== Resultados Bootstrap (Residuales) ===\n")
+cat("Media de las estimaciones bootstrap (S_barra):", S_barra, "\n")
+cat("Sesgo estimado (bias_boot):", bias_boot, "\n")
+cat("Estimador corregido por sesgo (S_corr):", S_corr, "\n\n")
+
+# Intervalo de confianza al 95% (por percentiles) para el método residuales
+IC_95_res <- quantile(boot_res$t, probs = c(0.025, 0.975))
+cat("Intervalo de confianza (remuestreo residuales): (", IC_95_res[1], ",", IC_95_res[2], ")\n\n")
+
+# Intervalo de confianza para el método de casos
+IC_95_cas <- quantile(boot_cas$t, probs = c(0.025, 0.975))
+cat("=== Intervalo de confianza (remuestreo de casos) ===\n")
+cat("Intervalo: (", IC_95_cas[1], ",", IC_95_cas[2], ")\n\n")
+
+# ----- Histogramas: ambos métodos en un solo gráfico -----
+df_resid <- data.frame(S_estable = boot_res$t, Metodo = "Residuales")
+df_casos <- data.frame(S_estable = boot_cas$t, Metodo = "Casos")
+df_total <- rbind(df_resid, df_casos)
+
+p <- ggplot(df_total, aes(x = S_estable, fill = Metodo)) +
+  geom_histogram(position = "dodge", bins = 30, color = "black", alpha = 0.7) +
+  facet_wrap(~Metodo, ncol = 2) +
+  geom_vline(xintercept = S_estable, linetype = "dashed", color = "red") +
+  labs(title = "Distribución Bootstrap de S_estable",
+       x = "Nivel Estable (S*)",
+       y = "Frecuencia") +
+  theme_minimal()
+
+print(p)
+
+
 ```
+### Análisis de resulados
+1. Sobre el modelo de Beverton-Holt
+  * $\hat{\beta}_{1} = 0.002013231, \quad \hat{\beta}_{2} = 0.6978188$
+  * Tomando en cuenta los coeficientes estimamos que el nivel establ de la poblacion  es de: $150.01$ (miles de peces)
+  la población de salmónidos remuestreada llegará al equilibrio y se estabilizará cuando tenga 150000 reproductores y 150000 reclutas = 300000 sujetos.
+  * Los resultados obtenidos tienen sentido cuando hablamos de una población de salmónidos
+
+2.  Sobre el Bootstrap con remuestreos de residuales:
+  * La media de las estimaciones de bootstrap es $\overline{\hat{S}^*}= 150.0287$
+  * El sesgo estimado es de $bias_{boot}=0.0689$, lo cual es un valor muy pequeño y al corregirlo se obtiene un cambio pequeño:
+  
+  $$\hat{S}_{corr}=\hat{S}_{estable}-bias_{boot} \approx 150.0287$$
+  * Con este método obtuvimos con un 95% de confianza el intervalo: $(142.877, 157.5019)$ y este es similar al obtenido por el método de residuales, esta caracteristica indica que la estimación es confiable.
+
+3. El sesgo encontrado es muy cercano a cero y esto nos indica que la estimación es robusta.
+
+4. SObre la represntacion del histograma:
+  * Observamos que las dos distribuciones están centradas en valores cercanos a 150, con lo cual se confirma lo dicho anteriormente, se puede concluir que sin importar el mpetodo de remuestreo la estimación del promedio de $S_{estable}$ está ne torno a 150000 de peces.
+  * Podemos observar tambien que ambas distribuciones son relativamente simétricas y parece que tienen disperciones parecidas, esto indica que la varianza (incertidumbre estimada) es similar en ambos métodos.
 
