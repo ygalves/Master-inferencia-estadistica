@@ -64,7 +64,7 @@ conflict_prefer("lag", "dplyr")
 conflict_prefer("lift", "purrr")
 
 # Para hacer isntalacion de varios paquetes creamos un vector que contenga los nombre de los paquetes que queremos instalar
-paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","rlang","tidyr","gridExtra","progress","stats4","knitr")
+paquetes <- c("dplyr", "ggplot2", "caret", "ModelMetrics", "stats4", "tidyverse","rlang","tidyr","gridExtra","progress","stats4","knitr","reshape2","boot")
 
 # hacemos una Función que nos permite instalar paquetes si no están ya instalados en el sistema
 instalar_paquetes <- function(paquetes) {
@@ -101,6 +101,7 @@ library(tidyr)
 library(stats4)
 library(knitr)
 library(reshape2)
+library(boot)
 ```
 
 
@@ -148,6 +149,9 @@ archivo de datos **CellPhone** registra los tiempos de respuesta promedio de los
 8. Al usar la regla matemática de la distribución t de Student, se puede determinar si la media de las diferencias de tiempos de reacción es significativamente diferente de cero.
 
 ```{r}
+#fallo y toco volverla a llamar
+library(reshape2)
+
 # creamos la semilla para que los resultados sean reproducibles
 set.seed(123)
 
@@ -247,17 +251,22 @@ Genere $5000$ muestras aleatorias de tamaño $n = 10$ de una población normal c
 : http://cursos.leg.ufpr.br/ce089/10_bootstrap.html
 
 ```{r}
-# Vamos a crear los parámetros de la simulación segun la situacion 2
+# cargamos los parámetros de la simulación según la situación 2
 sample_sizes <- c(10, 30, 50, 100)  # tamaños de muestra
 n_sim <- 5000                       # número de simulaciones
 B <- 1000                           # número de re-muestras bootstrap
 
-# Data frame para almacenar los resultados
+# usamos un data frame para almacenar los resultados
 results <- data.frame(SampleSize = integer(), Method = character(), 
                       Coverage = numeric(), AvgWidth = numeric(), 
                       stringsAsFactors = FALSE)
 
-# Para cada tamaño de muestra
+# calculemos ahora el total de iteraciones para el progress bar y saber donde es que esta el script
+total_iterations <- length(sample_sizes) * n_sim
+pb <- txtProgressBar(min = 0, max = total_iterations, style = 3)
+counter <- 0
+
+# ahora  hacemos el loop para cada tamaño de muestra
 for (n in sample_sizes) {
   coverage_t <- numeric(n_sim)
   width_t <- numeric(n_sim)
@@ -265,51 +274,56 @@ for (n in sample_sizes) {
   coverage_boot <- numeric(n_sim)
   width_boot <- numeric(n_sim)
   
-  # Repetimos la simulación n_sim veces
+  # hagamos la simulación n_sim veces
   for (i in 1:n_sim) {
-    # Generar una muestra de tamaño n de N(5,1)
+    # generemos ahora una muestra de tamaño n de N(5,1)
     x <- rnorm(n, mean = 5, sd = 1)
     xbar <- mean(x)
     s <- sd(x)
     se <- s / sqrt(n)
     
-    ## Método t-basado
+    ## apliquemos el metodo t-student
     t_crit <- qt(0.975, df = n - 1)
     lower_t <- xbar - t_crit * se
     upper_t <- xbar + t_crit * se
     width_t[i] <- upper_t - lower_t
     coverage_t[i] <- as.numeric((lower_t <= 5) & (5 <= upper_t))
     
-    ## Método Bootstrap (percentil)
+    ## apliquemos el metodo Bootstrap (percentil)
     boot_means <- replicate(B, mean(sample(x, size = n, replace = TRUE)))
     lower_boot <- quantile(boot_means, 0.025)
     upper_boot <- quantile(boot_means, 0.975)
     width_boot[i] <- upper_boot - lower_boot
     coverage_boot[i] <- as.numeric((lower_boot <= 5) & (5 <= upper_boot))
+    
+    # vamos actualizando la barra de progreso
+    counter <- counter + 1
+    setTxtProgressBar(pb, counter)
   }
   
-  # Calcular resultados para el método t-basado
+  # calculemos los resultados para el método t-student
   cov_t <- mean(coverage_t) * 100  # porcentaje de cobertura
   avg_width_t <- mean(width_t)
   
-  # Calcular resultados para el método bootstrap
+  # calculemos los resultados para el método bootstrap
   cov_boot <- mean(coverage_boot) * 100
   avg_width_boot <- mean(width_boot)
   
-  # Guardamos los resultados en el data frame
+  # gaurdemos los resultados
   results <- rbind(results, data.frame(SampleSize = n, Method = "T-based", 
-                                       Coverage = cov_t, AvgWidth = avg_width_t))
+                                         Coverage = cov_t, AvgWidth = avg_width_t))
   results <- rbind(results, data.frame(SampleSize = n, Method = "Bootstrap", 
-                                       Coverage = cov_boot, AvgWidth = avg_width_boot))
+                                         Coverage = cov_boot, AvgWidth = avg_width_boot))
 }
 
-# Mostrar la tabla de resultados con knitr::kable
+# hay que cerrar ahora la barra de progreso
+close(pb)
+
+# presentemos los resultados usando knitr::kable
 library(knitr)
 kable(results, caption = "Resultados: Porcentaje de Cobertura y Amplitud Promedio")
 
-### Gráficos de Resultados
-
-# Gráfico: Porcentaje de Cobertura
+# mostremos el porcentaje de cobertura
 ggplot(results, aes(x = factor(SampleSize), y = Coverage, fill = Method)) +
   geom_bar(stat = "identity", position = "dodge") +
   labs(title = "Porcentaje de Cobertura por Método y Tamaño de Muestra",
@@ -317,7 +331,7 @@ ggplot(results, aes(x = factor(SampleSize), y = Coverage, fill = Method)) +
        y = "Cobertura (%)") +
   theme_minimal()
 
-# Gráfico: Amplitud Promedio
+# y mostremos la amplitud promedio
 ggplot(results, aes(x = factor(SampleSize), y = AvgWidth, fill = Method)) +
   geom_bar(stat = "identity", position = "dodge") +
   labs(title = "Amplitud Promedio de Intervalos por Método y Tamaño de Muestra",
@@ -523,79 +537,8 @@ La afirmación de Tanaka Ltda. es que la proporción de proyectos que ellos eval
 **Conclusión**: tomando un nivel de 1% no se encuentra evidencia estadística que concluya de forma definitiva que la proporcion de proyectos que toman más de 4 dias evaluados por tanaka es superior a los estudios de Robani.
 Entonces la afirmacion de Tanaka aunque no es superior se puede mantener estadísticamente ya que la prueba no es significativa porque el tamaño de la muestra es muy pequeño así los datos muestrales muestren diferencias.
   
-
 ```{r}
-# Creamos los conjuntos de valores obtenidos del ejercicio
-proyectos <- data.frame(
-  Proyecto = 1:20,
-  X = c(4,2,8,10,1,3,8,3,2,2,4,4,5,6,7,2,1,3,4,9),
-  Y = c(3,1,6,8,3,2,6,2,1,1,4,4,4,7,10,3,2,4,5,10),
-  Z = c(-1,-1,0,0,0,0,1,0,0,1,-1,-1,0,1,1,-1,-1,0,1,-1),
-  W = c(40,30.5,80.3,68.5,24.7,40.5,90.5,38.5,50.4,50.2,60.1,60.8,70.9,80,90,30,27,40,50,40)
-)
-
-### (a) Intervalo de confianza para la media de W (90%)
-n <- nrow(proyectos)
-mediaW <- mean(proyectos$W)
-sdW <- sd(proyectos$W)
-error <- sdW / sqrt(n)
-t_val <- qt(0.95, df = n-1)
-IC_a <- c(mediaW - t_val * error, mediaW + t_val * error)
-IC_a
-
-### (b) Proporción de proyectos con W < 50, X > 2 y Y <= 6
-sub <- subset(proyectos, X > 2 & Y <= 6)
-n_sub <- nrow(sub)
-exito <- sum(sub$W < 50)
-p_hat <- exito / n_sub
-# Intervalo de confianza aproximado (Wald)
-z_val <- qnorm(0.95)
-SE_p <- sqrt(p_hat * (1 - p_hat) / n_sub)
-IC_b <- c(p_hat - z_val * SE_p, p_hat + z_val * SE_p)
-IC_b
-
-### (c) Comparación de medias: Evaluación interna (Z=-1) vs externa (Z=0 o 1)
-interno <- subset(proyectos, Z == -1)
-externo <- subset(proyectos, Z != -1)
-
-# Calcular medias y varianzas
-media_int <- mean(interno$W)
-media_ext <- mean(externo$W)
-var_int <- var(interno$W)
-var_ext <- var(externo$W)
-
-# Test de igualdad de varianzas (F-test)
-F_calculado <- var_ext / var_int
-F_calculado
-# Se puede comparar con el valor crítico con df1 = n_ext-1, df2 = n_int-1
-
-# Prueba t para muestras independientes (varianzas iguales)
-t_result <- t.test(externo$W, interno$W, alternative = "greater", var.equal = TRUE)
-t_result
-
-### (d) Comparación de proporciones: Proyectos con X > 4 en Tanaka (Z=1) vs Robani (Z=0)
-tanaka <- subset(proyectos, Z == 1)
-robani <- subset(proyectos, Z == 0)
-
-p_tanaka <- sum(tanaka$X > 4) / nrow(tanaka)
-p_robani <- sum(robani$X > 4) / nrow(robani)
-
-# Prueba de diferencia de proporciones (z-test)
-# Conjuntamos las cuentas:
-x <- c(sum(tanaka$X > 4), sum(robani$X > 4))
-n_group <- c(nrow(tanaka), nrow(robani))
-prop.test(x, n_group, alternative = "greater", correct = FALSE)
-```
-
-### Conclusiones
-
-a.  Con un 90% de confianza el costo medio de los proyectos está entre 45.06 y 61.24 U.F aproximadamente.
-b.  Con un 90% de confianza la proporción de proyectos con costo inferior a 50 U.F. y que involucran $\leq6$ variables y toman más de 2 dias., están entre 14.5% y 65.5% aproximadamente.
-c.  Existe significativamente evidencia a $\alpha=0.05$ de que el costo medio de proyectos enviados a asesores externos es mayor que el de evaluarlos internamente
-d.  En un nivel del 1% no se encuentra suficiente evidencia para afirmar que la proporción de proyectos que toman más de 4 días evaluados por tanaka es superior a los de Robani; por lo tanto esta afirmación se mantiene.
-
-
-```{r}
+library(ggplot2)
 # Datos proporcionados
 X <- c(4, 2, 8, 10, 1, 3, 8, 3, 2, 2, 4, 4, 5, 6, 7, 2, 1, 3, 4, 9)
 Y <- c(3, 1, 6, 8, 3, 2, 6, 2, 1, 1, 4, 4, 4, 7, 10, 3, 2, 4, 5, 10)
@@ -605,7 +548,7 @@ W <- c(40, 30.5, 80.3, 68.5, 24.7, 40.5, 90.5, 38.5, 50.4, 50.2, 60.1, 60.8, 70.
 # Creación del data frame
 datos <- data.frame(X, Y, Z, W)
 
-# Inciso a: Intervalo de confianza del 90% para el costo medio
+# a: Intervalo de confianza del 90% para el costo medio
 alpha <- 0.10
 n <- length(W)
 media_W <- mean(W)
@@ -614,10 +557,10 @@ t_critico <- qt(1 - alpha/2, df = n - 1)
 margin_error <- t_critico * (desv_W / sqrt(n))
 intervalo_W <- c(media_W - margin_error, media_W + margin_error)
 
-print("Intervalo de confianza del 90% para el costo medio:")
+print("a - Intervalo de confianza del 90% para el costo medio:")
 print(intervalo_W)
 
-# Inciso b: Estimación de proporción con IC del 90%
+# b: Estimación de proporción con IC del 90%
 subset_datos <- datos[Y <= 6 & X > 2, ]
 n_cumplen <- sum(subset_datos$W < 50)
 n_total <- nrow(subset_datos)
@@ -626,10 +569,10 @@ se_prop <- sqrt((prop_cumplen * (1 - prop_cumplen)) / n_total)
 z_critico <- qnorm(1 - alpha/2)
 intervalo_prop <- c(prop_cumplen - z_critico * se_prop, prop_cumplen + z_critico * se_prop)
 
-print("Intervalo de confianza del 90% para la proporción de proyectos con ciertas condiciones:")
+print("b - Intervalo de confianza del 90% para la proporción de proyectos con ciertas condiciones:")
 print(intervalo_prop)
 
-# Inciso c: Prueba de hipótesis para diferencia de medias
+# c: Prueba de hipótesis para diferencia de medias
 W_externo <- W[Z != -1]
 W_interno <- W[Z == -1]
 var_test <- var.test(W_externo, W_interno)
@@ -639,10 +582,10 @@ if (var_test$p.value < 0.05) {
   test_result <- t.test(W_externo, W_interno, var.equal = TRUE)
 }
 
-print("Prueba de hipótesis para diferencia de medias:")
+print("c - Prueba de hipótesis para diferencia de medias:")
 print(test_result)
 
-# Inciso d: Prueba de hipótesis para proporciones
+# d: Prueba de hipótesis para proporciones
 p_tanaka <- sum(X[Z == 1] > 4) / sum(Z == 1)
 p_robani <- sum(X[Z == 0] > 4) / sum(Z == 0)
 n_tanaka <- sum(Z == 1)
@@ -652,16 +595,24 @@ se_pool <- sqrt(p_pool * (1 - p_pool) * (1/n_tanaka + 1/n_robani))
 z_stat <- (p_tanaka - p_robani) / se_pool
 p_valor_prop <- 2 * (1 - pnorm(abs(z_stat)))
 
-print("Prueba de hipótesis para proporciones:")
+print("d - Prueba de hipótesis para proporciones:")
 print(paste("z =", z_stat, ", p-valor =", p_valor_prop))
 
-# Gráfico de distribución de costos
-ggplot(datos, aes(x = factor(Z), y = W)) + 
-  geom_boxplot(fill = "lightblue", color = "black") +
-  labs(title = "Distribución de costos por tipo de evaluador", x = "Evaluador", y = "Costo (UF)") +
+#grafico de costo por consultor
+ggplot(datos, aes(x = factor(Z), y = W, fill = factor(Z))) +
+  geom_boxplot() +
+  scale_x_discrete(labels = c("-1" = "Interno", "0" = "Robani", "1" = "Tanaka")) +
+  labs(title = "Costo de Evaluación por Tipo de Consultor",
+       x = "Tipo de Consultor",
+       y = "Costo (UF)") +
   theme_minimal()
-
 ```
+### Conclusiones
+
+a.  Con un 90% de confianza el costo medio de los proyectos está entre 45.06 y 61.24 U.F aproximadamente.
+b.  Con un 90% de confianza la proporción de proyectos con costo inferior a 50 U.F. y que involucran $\leq6$ variables y toman más de 2 dias., están entre 14.5% y 65.5% aproximadamente.
+c.  Existe significativamente evidencia a $\alpha=0.05$ de que el costo medio de proyectos enviados a asesores externos es mayor que el de evaluarlos internamente
+d.  En un nivel del 1% no se encuentra suficiente evidencia para afirmar que la proporción de proyectos que toman más de 4 días evaluados por tanaka es superior a los de Robani; por lo tanto esta afirmación se mantiene.
 
 
 # ------------------------------
@@ -899,12 +850,12 @@ $$\hat{S}_{corr}=\hat{S}-bias_{boot}=\hat{S}-\left(\overline{\hat{S^*}}-\hat{S}\
 
 $$\hat{S}_{corr}=2 \times 124.75-126=249.50-126=123.5$$
 ```{r}
-# Cargar librerías necesarias
-library(ggplot2)
-library(boot)
+# cargamos gridextra ahora porque al inicio esta da problemas con pivot longer
 library(gridExtra)
+library(boot)
+library(ggplot2)
 
-# Datos de la tabla (unidades: miles de peces)
+# creamos los vectores para R y S con los datos de la tabla y tenemos en cuenta que las unidades: miles de peces
 R_vals <- c(68, 222, 311, 244, 77, 205, 166, 222, 299, 233, 248, 195, 220, 228, 161, 203, 
             142, 188, 226, 210, 287, 132, 67, 275, 276, 285, 201, 286, 115, 188, 267, 275, 
             64, 224, 121, 304, 206, 121, 301, 214)
@@ -914,18 +865,18 @@ S_vals <- c(56, 351, 412, 265, 62, 282, 176, 301, 445, 310, 313, 234, 279, 266, 
 
 datos <- data.frame(R = R_vals, S = S_vals)
 
-# Transformar las variables: usamos 1/R y 1/S
+# Transformamos las variables usando 1/R y 1/S para normalizarlos, linearizarlos para el uso en el modelo de Beverton-Holt
 datos$inv_R <- 1 / datos$R
 datos$inv_S <- 1 / datos$S
 
-# Ajustar el modelo de regresión lineal:
-# Se ajusta: 1/R = beta1 + beta2*(1/S)
+# Ajustamos el modelo de regresión lineal:
+# ajustamos 1/R = beta1 + beta2*(1/S)
 modelo <- lm(inv_R ~ inv_S, data = datos)
 beta1_hat <- coef(modelo)[1]
 beta2_hat <- coef(modelo)[2]
 
-# Calcular el nivel estable de la población (donde R = S)
-# Fórmula correcta: S_estable = (1 - beta2_hat) / beta1_hat
+# Calculamos el nivel estable de la población (R = S)
+# Fórmula: S_estable = (1 - beta2_hat) / beta1_hat
 S_estable <- (1 - beta2_hat) / beta1_hat
 
 cat("\n=== Modelo de Beverton-Holt ===\n")
@@ -933,15 +884,14 @@ cat("Beta1 estimado:", beta1_hat, "\n")
 cat("Beta2 estimado:", beta2_hat, "\n")
 cat("Nivel estable estimado (S_estable):", S_estable, "\n\n")
 
-# ----- BOOTSTRAP -----
+# Aplicacion del método BOOTSTRAP
 
-B <- 1000  # Número de replicaciones bootstrap
+B <- 1000  # Número de replicaciones bootstrap, usamos l numero de iteraciones habituales para estos casos
 
-# 1. Método: Remuestreo de residuales
+# aplicamos el primer método, el de remuestreo de residuales
 boot_residuales <- function(data, indices) {
-  # Crear una copia de los datos
   data_boot <- data
-  # Remuestrear residuales (con reemplazo) y sumarlos a los valores ajustados
+  # vamos a remuestrear los residuales (con reemplazo) y los sumamos a los valores ajustados
   data_boot$inv_R <- fitted(modelo) + residuals(modelo)[indices]
   modelo_boot <- lm(inv_R ~ inv_S, data = data_boot)
   beta1_boot <- coef(modelo_boot)[1]
@@ -949,10 +899,11 @@ boot_residuales <- function(data, indices) {
   return( (1 - beta2_boot) / beta1_boot )
 }
 
+# la semilla para grantizar la repetitibilidad del código
 set.seed(123)
 boot_res <- boot(data = datos, statistic = boot_residuales, R = B)
 
-# 2. Método: Remuestreo de casos
+# aplicamos el segundo método, el de remuestreo de casos
 boot_casos <- function(data, indices) {
   data_boot <- data[indices, ]
   modelo_boot <- lm(inv_R ~ inv_S, data = data_boot)
@@ -964,7 +915,7 @@ boot_casos <- function(data, indices) {
 set.seed(123)
 boot_cas <- boot(data = datos, statistic = boot_casos, R = B)
 
-# Calcular la media bootstrap (S_barra) y el sesgo
+# vamo a calcular la media bootstrap (S_barra) y el sesgo
 S_barra <- mean(boot_res$t)  # Media de las estimaciones bootstrap (usando residuales)
 bias_boot <- S_barra - S_estable
 S_corr <- S_estable - bias_boot
@@ -974,16 +925,16 @@ cat("Media de las estimaciones bootstrap (S_barra):", S_barra, "\n")
 cat("Sesgo estimado (bias_boot):", bias_boot, "\n")
 cat("Estimador corregido por sesgo (S_corr):", S_corr, "\n\n")
 
-# Intervalo de confianza al 95% (por percentiles) para el método residuales
+# encontrar el intervalo de confianza al 95% (por percentiles) para el método residuales
 IC_95_res <- quantile(boot_res$t, probs = c(0.025, 0.975))
 cat("Intervalo de confianza (remuestreo residuales): (", IC_95_res[1], ",", IC_95_res[2], ")\n\n")
 
-# Intervalo de confianza para el método de casos
+# calcular el intervalo de confianza para el método de casos
 IC_95_cas <- quantile(boot_cas$t, probs = c(0.025, 0.975))
 cat("=== Intervalo de confianza (remuestreo de casos) ===\n")
 cat("Intervalo: (", IC_95_cas[1], ",", IC_95_cas[2], ")\n\n")
 
-# ----- Histogramas: ambos métodos en un solo gráfico -----
+# crear los histogramas para los dos métodos
 df_resid <- data.frame(S_estable = boot_res$t, Metodo = "Residuales")
 df_casos <- data.frame(S_estable = boot_cas$t, Metodo = "Casos")
 df_total <- rbind(df_resid, df_casos)
@@ -998,8 +949,6 @@ p <- ggplot(df_total, aes(x = S_estable, fill = Metodo)) +
   theme_minimal()
 
 print(p)
-
-
 ```
 ### Análisis de resulados
 1. Sobre el modelo de Beverton-Holt
